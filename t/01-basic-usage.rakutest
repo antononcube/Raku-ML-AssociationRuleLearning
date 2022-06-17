@@ -1,0 +1,36 @@
+use v6.d;
+use Test;
+
+use lib '.';
+use lib './lib';
+
+use ML::AssociationRuleLearning;
+use Data::ExampleDatasets;
+use Data::Reshapers;
+
+sub is-list-of-lists($arr) {
+    $arr ~~ List and ([and] $arr.map({ $_ ~~ List }))
+}
+
+plan 6;
+
+## 1
+use-ok 'Data::ExampleDatasets', 'Data::ExampleDatasets loads ok';
+
+## 2
+use-ok 'Data::Reshapers', 'Data::Reshapers loads ok';
+
+## 3
+my @dsTitanic = get-titanic-dataset();
+is is-list-of-lists(@dsTitanic.map({ $_.values.List }).Array), True, 'Expected @dsTitanic transformed shape';
+
+## 4
+ok eclat(@dsTitanic, 200);
+
+## 5
+ok eclat(@dsTitanic, min-support => 200, min-number-of-items => 2, max-number-of-items => 5);
+
+## 6
+ok eclat(@dsTitanic.map({ $_.values.List }).Array, 200);
+
+done-testing;

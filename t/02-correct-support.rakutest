@@ -1,0 +1,26 @@
+use v6.d;
+use Test;
+
+use lib '.';
+use lib './lib';
+
+use ML::AssociationRuleLearning;
+use Data::ExampleDatasets;
+use Data::Reshapers;
+
+
+sub is-list-of-lists($arr) {
+    $arr ~~ List and ([and] $arr.map({ $_ ~~ List }))
+}
+
+plan 1;
+
+## 1
+my @dsTitanic = get-titanic-dataset();
+my @freqSets = eclat(@dsTitanic.map({ $_.values.List }).Array, min-support => 171, min-number-of-items => 2, max-number-of-items => 6);
+
+my @freqSetsCheck = @freqSets.map( -> $fq { $fq.key => @dsTitanic.grep({ ($_.values (&) $fq.key).elems == $fq.key.elems }).elems });
+
+is-deeply @freqSets, @freqSetsCheck, 'Titanic correctness check';
+
+done-testing;
