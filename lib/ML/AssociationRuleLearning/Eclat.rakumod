@@ -52,24 +52,31 @@ class ML::AssociationRuleLearning::Eclat {
     ## Eclat
     ##-------------------------------------------------------
 
-    multi method frequent-sets(%itemTrans, $min-support!, *%args) {
-        return self.frequent-sets(%itemTrans, :$min-support, |%args);
-    }
+    method frequent-sets(%itemTrans,
+                         Numeric :$min-support!,
+                         Numeric :$min-number-of-items = 1,
+                         Numeric :$max-number-of-items = Inf,
+                         Str :$sep = '∩') {
 
-    multi method frequent-sets(%itemTrans,
-                               Numeric :$min-support!,
-                               Numeric :$max-number-of-items = Inf,
-                               Str :$sep = '∩') {
-
+        # Reset accumulated frequent sets holder
         @!freqSets = ();
+
+        # Get transactions
         %!itemTransactions = %itemTrans.clone;
 
+        # Find initial frequent sets
         my @P = %itemTrans.grep({ $_.value.elems ≥ $min-support }).map({ ($_.key,) }).Array;
-        self.find-freq-sets-rec(@P, :$min-support, :$max-number-of-items);
 
+        # Main Eclat loop
+        self.find-freq-sets-rec(@P, :$min-support, :$max-number-of-items, :$sep);
+
+        # Get frequent sets
         my @res = @!freqSets.sort.List;
 
-        return @res.map({ $_ => self.support( %!itemTransactions, $_ )}).Array;
+        # Filter by min length
+        @res = @res.grep({ $_.elems ≥ $min-number-of-items }).List;
+
+        return @res.map({ $_ => self.support(%!itemTransactions, $_) }).Array;
     }
 
     ##-------------------------------------------------------

@@ -4,11 +4,9 @@ use lib '.';
 use lib './lib';
 
 use ML::AssociationRuleLearning;
-use ML::AssociationRuleLearning::Eclat;
 use Data::ExampleDatasets;
 use Data::Reshapers;
 use Data::Summarizers;
-use Hash::Merge;
 
 #my $url = 'https://raw.githubusercontent.com/antononcube/Raku-Data-Reshapers/main/resources/dfTitanic.csv';
 #my @dsTitanic = example-dataset($url, :headers);
@@ -17,29 +15,18 @@ records-summary(@dsTitanic);
 
 say @dsTitanic.pick(3);
 
-my %itemTransactions;
-say (@dsTitanic[0].keys (-) 'id').keys;
-for (@dsTitanic[0].keys (-) 'id').keys -> $colName {
-    # This is to visualize
-    #%itemTransactions = merge-hash( %itemTransactions, cross-tabulate(@dsTitanic[^12], $colName, 'id').map({ $_.key => $_.value.keys }).Hash );
-    %itemTransactions = merge-hash( %itemTransactions, cross-tabulate(@dsTitanic, $colName, 'id'));
-}
 
-#say to-pretty-table(%itemTransactions);
-#say %itemTransactions;
+say @dsTitanic.map({ $_.values.List }).Array.raku;
 
-my ML::AssociationRuleLearning::Eclat $eclatObj .= new;
+my $tstart = now;
+my @freqSets = eclat(@dsTitanic.map({ $_.values.List }).Array, min-support => 171, min-number-of-items => 2, max-number-of-items => 6);
+my $tend = now;
+say "Titanic frequent sets finding time : {$tend - $tstart}";
 
-#`(
-say $eclatObj.intersect(%itemTransactions, <male died>);
-say $eclatObj.intersect(%itemTransactions, <male died>, <3rd died>);
+say @freqSets;
 
-say $eclatObj.support(%itemTransactions, <male died>, <3rd died>);
-
-say $eclatObj.extend(%itemTransactions, <male died>, <3rd died>).map({ $_.key => $_.value.elems });
-
-say (<male died> leg <3rd died>) === More;
-)
-
-#.say for $eclatObj.frequent-sets(%itemTransactions, min-support => 171);
-say to-pretty-table($eclatObj.frequent-sets(%itemTransactions, min-support => 171).map({ %( Frequent-set => $_.key.join(' '), Support => $_.value) }), align => 'l');
+say to-pretty-table(@freqSets.map({ %( Frequent-set => $_.key.join(' '), Support => $_.value) }), align => 'l');
+#
+#my @freqSets2 = eclat(@dsTitanic, min-support => 171, max-number-of-items => 3);
+#
+#say to-pretty-table(@freqSets2.map({ %( Frequent-set => $_.key.join(' '), Support => $_.value) }), align => 'l');
