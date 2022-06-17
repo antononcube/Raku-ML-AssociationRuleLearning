@@ -1,0 +1,32 @@
+{
+  "name": "ML::AssociationRuleLearning",
+  "description": "Package for association rule learning. (Apriori, Eclat, confidence, lift, conviction.)",
+  "version": "0.1.0",
+  "perl": "6.d",
+  "authors": [
+    "Anton Antonov"
+  ],
+  "auth": "zef:antononcube",
+  "depends": [],
+  "build-depends": [],
+  "test-depends": [],
+  "provides": {
+    "ML::AssociationRuleLearning": "lib/ML/AssociationRuleLearning.rakumod",
+    "ML::AssociationRuleLearning::Eclat": "lib/ML/AssociationRuleLearning/Eclat.rakumod",
+    "ML::AssociationRuleLearning::Measures": "lib/ML/AssociationRuleLearning/Measures.rakumod"
+  },
+  "resources": [
+  ],
+  "license": "Artistic-2.0",
+  "tags": [
+    "Apriori",
+    "Eclat",
+    "Association Rule Learning",
+    "ML",
+    "machine learning",
+    "rules",
+    "unsupervised"
+  ],
+  "api": "1",
+  "source-url": "https://github.com/antononcube/Raku-ML-ROCFunctions.git"
+}
