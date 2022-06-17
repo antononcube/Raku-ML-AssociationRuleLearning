@@ -58,18 +58,18 @@ my @dsTitanic = get-titanic-dataset();
 records-summary(@dsTitanic);
 ```
 ```
-# +----------------+-----------------+----------------+-------------------+---------------+
-# | passengerClass | id              | passengerAge   | passengerSurvival | passengerSex  |
-# +----------------+-----------------+----------------+-------------------+---------------+
-# | 3rd => 709     | 947     => 1    | 20      => 334 | died     => 809   | male   => 843 |
-# | 1st => 323     | 750     => 1    | -1      => 263 | survived => 500   | female => 466 |
-# | 2nd => 277     | 59      => 1    | 30      => 258 |                   |               |
-# |                | 315     => 1    | 40      => 190 |                   |               |
-# |                | 1233    => 1    | 50      => 88  |                   |               |
-# |                | 716     => 1    | 60      => 57  |                   |               |
-# |                | 505     => 1    | 0       => 56  |                   |               |
-# |                | (Other) => 1302 | (Other) => 63  |                   |               |
-# +----------------+-----------------+----------------+-------------------+---------------+
+# +-----------------+----------------+----------------+---------------+-------------------+
+# | id              | passengerClass | passengerAge   | passengerSex  | passengerSurvival |
+# +-----------------+----------------+----------------+---------------+-------------------+
+# | 990     => 1    | 3rd => 709     | 20      => 334 | male   => 843 | died     => 809   |
+# | 286     => 1    | 1st => 323     | -1      => 263 | female => 466 | survived => 500   |
+# | 412     => 1    | 2nd => 277     | 30      => 258 |               |                   |
+# | 837     => 1    |                | 40      => 190 |               |                   |
+# | 465     => 1    |                | 50      => 88  |               |                   |
+# | 1035    => 1    |                | 60      => 57  |               |                   |
+# | 634     => 1    |                | 0       => 56  |               |                   |
+# | (Other) => 1302 |                | (Other) => 63  |               |                   |
+# +-----------------+----------------+----------------+---------------+-------------------+
 ```
 
 **Problem:** Find all combinations values of the variables "passengerAge", "passengerClass", "passengerSex", and
@@ -114,17 +114,15 @@ say to-pretty-table(@freqSets.map({ %( Frequent-set => $_.key.join(' '), Support
 We can verify the result by looking into these group counts, [AA2]:
 
 ```perl6
-my $obj = @dsTitanic ;
-$obj = group-by( $obj, <passengerClass passengerSex>) ;
-.say for $obj>>.elems
+my $obj = group-by( @dsTitanic, <passengerClass passengerSex>);
+.say for $obj>>.elems.grep({ $_.value >= 200 });
+$obj = group-by( @dsTitanic, <passengerClass passengerSurvival passengerSex>);
+.say for $obj>>.elems.grep({ $_.value >= 200 });
 ```
 ```
-# 3rd.male => 493
-# 2nd.male => 171
-# 2nd.female => 106
 # 3rd.female => 216
-# 1st.male => 179
-# 1st.female => 144
+# 3rd.male => 493
+# 3rd.died.male => 418
 ```
 
 ### Association rules

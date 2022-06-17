@@ -80,9 +80,10 @@ say to-pretty-table(@freqSets.map({ %( Frequent-set => $_.key.join(' '), Support
 We can verify the result by looking into these group counts, [AA2]:
 
 ```perl6
-my $obj = @dsTitanic ;
-$obj = group-by( $obj, <passengerClass passengerSex>) ;
-.say for $obj>>.elems
+my $obj = group-by( @dsTitanic, <passengerClass passengerSex>);
+.say for $obj>>.elems.grep({ $_.value >= 200 });
+$obj = group-by( @dsTitanic, <passengerClass passengerSurvival passengerSex>);
+.say for $obj>>.elems.grep({ $_.value >= 200 });
 ```
 
 ### Association rules
