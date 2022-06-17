@@ -1,4 +1,4 @@
-# Raku-ML-AssociationRuleLearning
+# Raku ML::AssociationRuleLearning
 
 Raku package for association rule learning.
 
@@ -58,18 +58,18 @@ my @dsTitanic = get-titanic-dataset();
 records-summary(@dsTitanic);
 ```
 ```
-# +-----------------+-------------------+----------------+----------------+---------------+
-# | id              | passengerSurvival | passengerClass | passengerAge   | passengerSex  |
-# +-----------------+-------------------+----------------+----------------+---------------+
-# | 901     => 1    | died     => 809   | 3rd => 709     | 20      => 334 | male   => 843 |
-# | 488     => 1    | survived => 500   | 1st => 323     | -1      => 263 | female => 466 |
-# | 153     => 1    |                   | 2nd => 277     | 30      => 258 |               |
-# | 852     => 1    |                   |                | 40      => 190 |               |
-# | 508     => 1    |                   |                | 50      => 88  |               |
-# | 396     => 1    |                   |                | 60      => 57  |               |
-# | 124     => 1    |                   |                | 0       => 56  |               |
-# | (Other) => 1302 |                   |                | (Other) => 63  |               |
-# +-----------------+-------------------+----------------+----------------+---------------+
+# +----------------+-----------------+----------------+-------------------+---------------+
+# | passengerClass | id              | passengerAge   | passengerSurvival | passengerSex  |
+# +----------------+-----------------+----------------+-------------------+---------------+
+# | 3rd => 709     | 947     => 1    | 20      => 334 | died     => 809   | male   => 843 |
+# | 1st => 323     | 750     => 1    | -1      => 263 | survived => 500   | female => 466 |
+# | 2nd => 277     | 59      => 1    | 30      => 258 |                   |               |
+# |                | 315     => 1    | 40      => 190 |                   |               |
+# |                | 1233    => 1    | 50      => 88  |                   |               |
+# |                | 716     => 1    | 60      => 57  |                   |               |
+# |                | 505     => 1    | 0       => 56  |                   |               |
+# |                | (Other) => 1302 | (Other) => 63  |                   |               |
+# +----------------+-----------------+----------------+-------------------+---------------+
 ```
 
 **Problem:** Find all combinations values of the variables "passengerAge", "passengerClass", "passengerSex", and
@@ -94,21 +94,21 @@ Here we tabulate the result:
 say to-pretty-table(@freqSets.map({ %( Frequent-set => $_.key.join(' '), Support => $_.value) }), align => 'l');
 ```
 ```
-# +-----------------+---------+
-# | Frequent-set    | Support |
-# +-----------------+---------+
-# | -1 3rd          | 208     |
-# | 1st survived    | 200     |
-# | 20 3rd          | 206     |
-# | 20 died         | 208     |
-# | 20 male         | 208     |
-# | 3rd died        | 528     |
-# | 3rd died male   | 418     |
-# | 3rd female      | 216     |
-# | 3rd male        | 493     |
-# | died male       | 682     |
-# | female survived | 339     |
-# +-----------------+---------+
+# +---------+-----------------+
+# | Support | Frequent-set    |
+# +---------+-----------------+
+# | 208     | -1 3rd          |
+# | 200     | 1st survived    |
+# | 206     | 20 3rd          |
+# | 208     | 20 died         |
+# | 208     | 20 male         |
+# | 528     | 3rd died        |
+# | 418     | 3rd died male   |
+# | 216     | 3rd female      |
+# | 493     | 3rd male        |
+# | 682     | died male       |
+# | 339     | female survived |
+# +---------+-----------------+
 ```
 
 We can verify the result by looking into these group counts, [AA2]:
@@ -119,11 +119,11 @@ $obj = group-by( $obj, <passengerClass passengerSex>) ;
 .say for $obj>>.elems
 ```
 ```
-# 1st.male => 179
+# 3rd.male => 493
 # 2nd.male => 171
 # 2nd.female => 106
-# 3rd.male => 493
 # 3rd.female => 216
+# 1st.male => 179
 # 1st.female => 144
 ```
 

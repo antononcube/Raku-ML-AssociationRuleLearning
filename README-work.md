@@ -1,4 +1,4 @@
-# Raku-ML-AssociationRuleLearning
+# Raku ML::AssociationRuleLearning
 
 Raku package for association rule learning.
 
