@@ -57,20 +57,6 @@ use Data::Summarizers;
 my @dsTitanic = get-titanic-dataset();
 records-summary(@dsTitanic);
 ```
-```
-# +-----------------+-------------------+----------------+----------------+---------------+
-# | id              | passengerSurvival | passengerClass | passengerAge   | passengerSex  |
-# +-----------------+-------------------+----------------+----------------+---------------+
-# | 901     => 1    | died     => 809   | 3rd => 709     | 20      => 334 | male   => 843 |
-# | 488     => 1    | survived => 500   | 1st => 323     | -1      => 263 | female => 466 |
-# | 153     => 1    |                   | 2nd => 277     | 30      => 258 |               |
-# | 852     => 1    |                   |                | 40      => 190 |               |
-# | 508     => 1    |                   |                | 50      => 88  |               |
-# | 396     => 1    |                   |                | 60      => 57  |               |
-# | 124     => 1    |                   |                | 0       => 56  |               |
-# | (Other) => 1302 |                   |                | (Other) => 63  |               |
-# +-----------------+-------------------+----------------+----------------+---------------+
-```
 
 **Problem:** Find all combinations values of the variables "passengerAge", "passengerClass", "passengerSex", and
 "passengerSurvival" that appear more 200 times in the Titanic dataset.
@@ -82,9 +68,6 @@ use ML::AssociationRuleLearning;
 my @freqSets = eclat(@dsTitanic.map({ $_.values.List }).Array, min-support => 200, min-number-of-items => 2, max-number-of-items => Inf);
 @freqSets.elems
 ```
-```
-# 11
-```
 
 The function `eclat` returns the frequent sets together with their support.
 
@@ -93,23 +76,6 @@ Here we tabulate the result:
 ```perl6
 say to-pretty-table(@freqSets.map({ %( Frequent-set => $_.key.join(' '), Support => $_.value) }), align => 'l');
 ```
-```
-# +-----------------+---------+
-# | Frequent-set    | Support |
-# +-----------------+---------+
-# | -1 3rd          | 208     |
-# | 1st survived    | 200     |
-# | 20 3rd          | 206     |
-# | 20 died         | 208     |
-# | 20 male         | 208     |
-# | 3rd died        | 528     |
-# | 3rd died male   | 418     |
-# | 3rd female      | 216     |
-# | 3rd male        | 493     |
-# | died male       | 682     |
-# | female survived | 339     |
-# +-----------------+---------+
-```
 
 We can verify the result by looking into these group counts, [AA2]:
 
@@ -117,14 +83,6 @@ We can verify the result by looking into these group counts, [AA2]:
 my $obj = @dsTitanic ;
 $obj = group-by( $obj, <passengerClass passengerSex>) ;
 .say for $obj>>.elems
-```
-```
-# 1st.male => 179
-# 2nd.male => 171
-# 2nd.female => 106
-# 3rd.male => 493
-# 3rd.female => 216
-# 1st.female => 144
 ```
 
 ### Association rules
