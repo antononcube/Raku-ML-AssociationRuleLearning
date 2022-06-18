@@ -1,6 +1,6 @@
 {
   "name": "ML::AssociationRuleLearning",
-  "description": "Package for association rule learning. (Apriori, Eclat, confidence, lift, conviction.)",
+  "description": "Package for association rule learning. (Apriori, Eclat, support, confidence, lift, leverage, conviction.)",
   "version": "0.1.0",
   "perl": "6.d",
   "authors": [
@@ -15,20 +15,27 @@
   "provides": {
     "ML::AssociationRuleLearning": "lib/ML/AssociationRuleLearning.rakumod",
     "ML::AssociationRuleLearning::Eclat": "lib/ML/AssociationRuleLearning/Eclat.rakumod",
-    "ML::AssociationRuleLearning::Measures": "lib/ML/AssociationRuleLearning/Measures.rakumod"
+    "ML::AssociationRuleLearning::Measures": "lib/ML/AssociationRuleLearning/Measures.rakumod",
+    "ML::AssociationRuleLearning::Preprocessing": "lib/ML/AssociationRuleLearning/Preprocessing.rakumod",
+    "ML::AssociationRuleLearning::RuleFinding": "lib/ML/AssociationRuleLearning/RuleFinding.rakumod"
   },
   "resources": [
   ],
   "license": "Artistic-2.0",
   "tags": [
     "Apriori",
-    "Eclat",
     "Association Rule Learning",
+    "Eclat",
     "ML",
+    "confidence",
+    "conviction",
+    "leverage",
+    "lift",
     "machine learning",
     "rules",
+    "support",
     "unsupervised"
   ],
   "api": "1",
-  "source-url": "https://github.com/antononcube/Raku-ML-ROCFunctions.git"
+  "source-url": "https://github.com/antononcube/Raku-ML-AssociationRuleLearning.git"
 }
