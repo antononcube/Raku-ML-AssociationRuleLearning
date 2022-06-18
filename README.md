@@ -55,18 +55,18 @@ my @dsTitanic = get-titanic-dataset();
 records-summary(@dsTitanic);
 ```
 ```
-# +----------------+-------------------+---------------+-----------------+----------------+
-# | passengerAge   | passengerSurvival | passengerSex  | id              | passengerClass |
-# +----------------+-------------------+---------------+-----------------+----------------+
-# | 20      => 334 | died     => 809   | male   => 843 | 300     => 1    | 3rd => 709     |
-# | -1      => 263 | survived => 500   | female => 466 | 744     => 1    | 1st => 323     |
-# | 30      => 258 |                   |               | 949     => 1    | 2nd => 277     |
-# | 40      => 190 |                   |               | 152     => 1    |                |
-# | 50      => 88  |                   |               | 257     => 1    |                |
-# | 60      => 57  |                   |               | 223     => 1    |                |
-# | 0       => 56  |                   |               | 1010    => 1    |                |
-# | (Other) => 63  |                   |               | (Other) => 1302 |                |
-# +----------------+-------------------+---------------+-----------------+----------------+
+# +----------------+---------------+-----------------+----------------+-------------------+
+# | passengerAge   | passengerSex  | id              | passengerClass | passengerSurvival |
+# +----------------+---------------+-----------------+----------------+-------------------+
+# | 20      => 334 | male   => 843 | 477     => 1    | 3rd => 709     | died     => 809   |
+# | -1      => 263 | female => 466 | 970     => 1    | 1st => 323     | survived => 500   |
+# | 30      => 258 |               | 894     => 1    | 2nd => 277     |                   |
+# | 40      => 190 |               | 1039    => 1    |                |                   |
+# | 50      => 88  |               | 263     => 1    |                |                   |
+# | 60      => 57  |               | 320     => 1    |                |                   |
+# | 0       => 56  |               | 340     => 1    |                |                   |
+# | (Other) => 63  |               | (Other) => 1302 |                |                   |
+# +----------------+---------------+-----------------+----------------+-------------------+
 ```
 
 **Problem:** Find all combinations values of the variables "passengerAge", "passengerClass", "passengerSex", and
@@ -76,7 +76,7 @@ Here is how we use Eclat's implementation to give an answer:
 
 ```perl6
 use ML::AssociationRuleLearning;
-my @freqSets = eclat(@dsTitanic.map({ $_.values.List }).Array, min-support => 200, min-number-of-items => 2, max-number-of-items => Inf):counts;
+my @freqSets = eclat(@dsTitanic, min-support => 200, min-number-of-items => 2, max-number-of-items => Inf):counts;
 @freqSets.elems
 ```
 ```
@@ -91,21 +91,21 @@ Here we tabulate the result:
 say to-pretty-table(@freqSets.map({ %( Frequent-set => $_.key.join(' '), Support => $_.value) }), align => 'l');
 ```
 ```
-# +---------+-----------------+
-# | Support | Frequent-set    |
-# +---------+-----------------+
-# | 208     | -1 3rd          |
-# | 200     | 1st survived    |
-# | 206     | 20 3rd          |
-# | 208     | 20 died         |
-# | 208     | 20 male         |
-# | 528     | 3rd died        |
-# | 418     | 3rd died male   |
-# | 216     | 3rd female      |
-# | 493     | 3rd male        |
-# | 682     | died male       |
-# | 339     | female survived |
-# +---------+-----------------+
+# +-------------------------------------------------------------+----------+
+# | Frequent-set                                                | Support  |
+# +-------------------------------------------------------------+----------+
+# | passengerAge:-1 passengerClass:3rd                          | 0.158900 |
+# | passengerAge:20 passengerClass:3rd                          | 0.157372 |
+# | passengerAge:20 passengerSex:male                           | 0.158136 |
+# | passengerAge:20 passengerSurvival:died                      | 0.158136 |
+# | passengerClass:1st passengerSurvival:survived               | 0.152788 |
+# | passengerClass:3rd passengerSex:female                      | 0.165011 |
+# | passengerClass:3rd passengerSex:male                        | 0.376623 |
+# | passengerClass:3rd passengerSex:male passengerSurvival:died | 0.319328 |
+# | passengerClass:3rd passengerSurvival:died                   | 0.403361 |
+# | passengerSex:female passengerSurvival:survived              | 0.258976 |
+# | passengerSex:male passengerSurvival:died                    | 0.521008 |
+# +-------------------------------------------------------------+----------+
 ```
 
 We can verify the result by looking into these group counts, [AA2]:
@@ -117,9 +117,20 @@ $obj = group-by( @dsTitanic, <passengerClass passengerSurvival passengerSex>);
 .say for $obj>>.elems.grep({ $_.value >= 200 });
 ```
 ```
-# 3rd.male => 493
 # 3rd.female => 216
+# 3rd.male => 493
 # 3rd.died.male => 418
+```
+
+**Remark:** For datasets -- i.e. arrays of hashes -- `eclat` preprocess the data by concatenating
+column names with corresponding column values. This done in order to prevent "collisions" from of same values from
+different columns. If that concatenation is not desired manual preprocessing like this can be used:
+
+```perl6
+@dsTitanic.map({ $_.values.List }).Array
+```
+```
+# [(survived 1st 1 female 30) (2 male 0 1st survived) (3 died 0 1st female) (died male 30 4 1st) (died female 20 1st 5) (1st survived 50 6 male) (survived female 60 7 1st) (male died 8 1st 40) (survived female 1st 50 9) (1st died 10 male 70) (male died 1st 50 11) (survived 1st female 20 12) (20 13 1st female survived) (30 female survived 14 1st) (male survived 80 1st 15) (-1 male 16 died 1st) (1st 17 20 male died) (female 18 1st 50 survived) (1st survived 19 female 30) (1st 40 male died 20) (40 survived male 21 1st) (1st 50 female survived 22) (male survived 1st 23 30) (40 survived 24 1st female) (female 25 survived 30 1st) (died 20 26 male 1st) (male 20 survived 27 1st) (28 1st survived female 20) (1st 29 survived female 40) (male survived 30 1st 30) (died 31 1st male 40) (male survived 1st 40 32) (female 30 33 survived 1st) (survived 34 60 1st female) (male died 35 40 1st) (survived 1st 40 36 female) (37 female 20 survived 1st) (1st male 38 survived -1) (1st 39 male died 40) (died 40 male 1st 50) (-1 1st died 41 male) (survived 42 1st female 40) (female 43 survived 1st 60) (survived 1st female 44 60) (45 40 female 1st survived) (1st 46 male died 40) (1st male -1 47 died) (40 male 48 1st survived) (survived 50 1st 49 female) (50 40 survived 1st male) (51 60 1st female survived) (30 male died 52 1st) (30 died 53 male 1st) (20 died 1st male 54) (10 survived male 1st 55) (survived 10 56 1st female) (57 40 survived 1st male) (58 40 female 1st survived) (1st male died 50 59) (female 1st survived 60 -1) (male 1st 40 died 61) (1st female survived 80 62) (1st died 63 male 50) (survived 50 female 1st 64) (30 65 male 1st survived) (survived 30 66 female 1st) (female 67 1st 40 survived) (68 female 30 survived 1st) (69 male 1st survived 40) (-1 survived 70 1st female) (71 died 1st -1 male) (died 1st male 72 30) (female 73 survived 1st 30) (1st survived 20 74 female) (1st 75 died male -1) (76 male 50 died 1st) (survived 1st 77 40 female) (78 40 male 1st died) (79 60 1st female survived) (survived 1st female 60 80) (81 1st male -1 died) (70 82 1st male died) (1st female 83 40 survived) (survived 84 1st 60 female) (1st 85 died male 40) (female 40 survived 1st 86) (1st survived male 87 50) (88 survived 30 male 1st) (89 1st survived female 30) (1st died male 90 30) (1st female survived 30 91) (male 1st 30 survived 92) (1st 93 20 survived female) (1st survived 94 male 50) (0 survived male 1st 95) (1st 50 female 96 survived) (50 male 97 1st died) (30 female 98 1st survived) (female survived 99 50 1st) (female survived 100 1st 50) ...]
 ```
 
 **Remark:** `elcat`'s argument `min-support` can take both integers greater than 1 and frequencies between 0 and 1.
@@ -136,15 +147,15 @@ association-rules(@dsTitanic, min-support => 0.3, min-confidence => 0.7)
 ==> to-pretty-table
 ```
 ```
-# +----------+-------------------------------------------+------------+------------------------+------------+----------+----------+-------+
-# | support  |                antecendent                | conviction |       consequent       | confidence | leverage |   lift   | count |
-# +----------+-------------------------------------------+------------+------------------------+------------+----------+----------+-------+
-# | 0.403361 |             passengerClass:3rd            |  1.496229  | passengerSurvival:died |  0.744711  | 0.068615 | 1.204977 |  528  |
-# | 0.521008 |             passengerSex:male             |  2.000009  | passengerSurvival:died |  0.809015  | 0.122996 | 1.309025 |  682  |
-# | 0.521008 |           passengerSurvival:died          |  2.267729  |   passengerSex:male    |  0.843016  | 0.122996 | 1.309025 |  682  |
-# | 0.319328 |    passengerClass:3rd passengerSex:male   |  2.510823  | passengerSurvival:died |  0.847870  | 0.086564 | 1.371894 |  418  |
-# | 0.319328 | passengerClass:3rd passengerSurvival:died |  1.708785  |   passengerSex:male    |  0.791667  | 0.059562 | 1.229290 |  418  |
-# +----------+-------------------------------------------+------------+------------------------+------------+----------+----------+-------+
+# +----------+----------+----------+------------+------------------------+-------------------------------------------+------------+-------+
+# | support  |   lift   | leverage | confidence |       consequent       |                antecendent                | conviction | count |
+# +----------+----------+----------+------------+------------------------+-------------------------------------------+------------+-------+
+# | 0.403361 | 1.204977 | 0.068615 |  0.744711  | passengerSurvival:died |             passengerClass:3rd            |  1.496229  |  528  |
+# | 0.521008 | 1.309025 | 0.122996 |  0.809015  | passengerSurvival:died |             passengerSex:male             |  2.000009  |  682  |
+# | 0.521008 | 1.309025 | 0.122996 |  0.843016  |   passengerSex:male    |           passengerSurvival:died          |  2.267729  |  682  |
+# | 0.319328 | 1.371894 | 0.086564 |  0.847870  | passengerSurvival:died |    passengerClass:3rd passengerSex:male   |  2.510823  |  418  |
+# | 0.319328 | 1.229290 | 0.059562 |  0.791667  |   passengerSex:male    | passengerClass:3rd passengerSurvival:died |  1.708785  |  418  |
+# +----------+----------+----------+------------+------------------------+-------------------------------------------+------------+-------+
 ```
 
 ### Reusing found frequent sets
@@ -169,25 +180,25 @@ $eclatObj.find-rules(min-confidence=>0.7)
 ==> to-pretty-table 
 ```
 ```
-# +----------+----------+-------+------------+-------------+------------+------------+----------+
-# |   lift   | leverage | count | consequent | antecendent | conviction | confidence | support  |
-# +----------+----------+-------+------------+-------------+------------+------------+----------+
-# | 1.460162 | 0.050076 |  208  |    3rd     |      -1     |  2.191819  |  0.790875  | 0.158900 |
-# | 1.092265 | 0.011938 |  185  |    male    |      -1     |  1.200349  |  0.703422  | 0.141329 |
-# | 1.309025 | 0.122996 |  682  |    male    |     died    |  2.267729  |  0.843016  | 0.521008 |
-# | 1.309025 | 0.122996 |  682  |    died    |     male    |  2.000009  |  0.809015  | 0.521008 |
-# | 1.299438 | 0.027990 |  159  |    male    |   -1 died   |  2.181917  |  0.836842  | 0.121467 |
-# | 1.390646 | 0.034121 |  159  |    died    |   -1 male   |  2.717870  |  0.859459  | 0.121467 |
-# | 1.229290 | 0.059562 |  418  |    male    |   3rd died  |  1.708785  |  0.791667  | 0.319328 |
-# | 1.371894 | 0.086564 |  418  |    died    |   3rd male  |  2.510823  |  0.847870  | 0.319328 |
-# | 1.313897 | 0.032122 |  176  |    male    |   20 died   |  2.313980  |  0.846154  | 0.134454 |
-# | 1.369117 | 0.036249 |  176  |    died    |   20 male   |  2.482811  |  0.846154  | 0.134454 |
-# | 1.904511 | 0.122996 |  339  |  survived  |    female   |  2.267729  |  0.727468  | 0.258976 |
-# | 1.168931 | 0.020977 |  190  |    died    |      -1     |  1.376142  |  0.722433  | 0.145149 |
-# | 1.204977 | 0.068615 |  528  |    died    |     3rd     |  1.496229  |  0.744711  | 0.403361 |
-# | 1.229093 | 0.022498 |  158  |    died    |    -1 3rd   |  1.588999  |  0.759615  | 0.120703 |
-# | 1.535313 | 0.042085 |  158  |    3rd     |   -1 died   |  2.721543  |  0.831579  | 0.120703 |
-# +----------+----------+-------+------------+-------------+------------+------------+----------+
+# +----------+------------+----------+----------+-------------+-------+------------+------------+
+# |   lift   | confidence | leverage | support  | antecendent | count | consequent | conviction |
+# +----------+------------+----------+----------+-------------+-------+------------+------------+
+# | 1.092265 |  0.703422  | 0.011938 | 0.141329 |      -1     |  185  |    male    |  1.200349  |
+# | 1.309025 |  0.843016  | 0.122996 | 0.521008 |     died    |  682  |    male    |  2.267729  |
+# | 1.309025 |  0.809015  | 0.122996 | 0.521008 |     male    |  682  |    died    |  2.000009  |
+# | 1.229290 |  0.791667  | 0.059562 | 0.319328 |   3rd died  |  418  |    male    |  1.708785  |
+# | 1.371894 |  0.847870  | 0.086564 | 0.319328 |   3rd male  |  418  |    died    |  2.510823  |
+# | 1.313897 |  0.846154  | 0.032122 | 0.134454 |   20 died   |  176  |    male    |  2.313980  |
+# | 1.369117 |  0.846154  | 0.036249 | 0.134454 |   20 male   |  176  |    died    |  2.482811  |
+# | 1.299438 |  0.836842  | 0.027990 | 0.121467 |   -1 died   |  159  |    male    |  2.181917  |
+# | 1.390646 |  0.859459  | 0.034121 | 0.121467 |   -1 male   |  159  |    died    |  2.717870  |
+# | 1.460162 |  0.790875  | 0.050076 | 0.158900 |      -1     |  208  |    3rd     |  2.191819  |
+# | 1.904511 |  0.727468  | 0.122996 | 0.258976 |    female   |  339  |  survived  |  2.267729  |
+# | 1.204977 |  0.744711  | 0.068615 | 0.403361 |     3rd     |  528  |    died    |  1.496229  |
+# | 1.229093 |  0.759615  | 0.022498 | 0.120703 |    -1 3rd   |  158  |    died    |  1.588999  |
+# | 1.535313 |  0.831579  | 0.042085 | 0.120703 |   -1 died   |  158  |    3rd     |  2.721543  |
+# | 1.168931 |  0.722433  | 0.020977 | 0.145149 |      -1     |  190  |    died    |  1.376142  |
+# +----------+------------+----------+----------+-------------+-------+------------+------------+
 ```
 
 **Remark:** Note that because of the specified min confidence, the number of association rules is "contained" --

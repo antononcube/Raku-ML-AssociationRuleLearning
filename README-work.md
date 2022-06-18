@@ -62,7 +62,7 @@ Here is how we use Eclat's implementation to give an answer:
 
 ```perl6
 use ML::AssociationRuleLearning;
-my @freqSets = eclat(@dsTitanic.map({ $_.values.List }).Array, min-support => 200, min-number-of-items => 2, max-number-of-items => Inf):counts;
+my @freqSets = eclat(@dsTitanic, min-support => 200, min-number-of-items => 2, max-number-of-items => Inf):counts;
 @freqSets.elems
 ```
 
@@ -81,6 +81,14 @@ my $obj = group-by( @dsTitanic, <passengerClass passengerSex>);
 .say for $obj>>.elems.grep({ $_.value >= 200 });
 $obj = group-by( @dsTitanic, <passengerClass passengerSurvival passengerSex>);
 .say for $obj>>.elems.grep({ $_.value >= 200 });
+```
+
+**Remark:** For datasets -- i.e. arrays of hashes -- `eclat` preprocess the data by concatenating
+column names with corresponding column values. This done in order to prevent "collisions" from of same values from
+different columns. If that concatenation is not desired manual preprocessing like this can be used:
+
+```perl6
+@dsTitanic.map({ $_.values.List }).Array
 ```
 
 **Remark:** `elcat`'s argument `min-support` can take both integers greater than 1 and frequencies between 0 and 1.
