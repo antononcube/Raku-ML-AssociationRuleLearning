@@ -11,9 +11,10 @@ unit module ML::AssociationRuleLearning;
 #------------------------------------------------------------
 #| Find frequent sets using the Eclat algorithm.
 #| C<$transactions> -- transactions data.
-#| C<:$min-support> -- minimum support for frequent sets found.
+#| C<:$min-support> -- minimum support for frequent sets found; can be an integer or a frequency.
 #| C<:$max-number-of-items> -- maximum length of frequent sets found.
 #| C<:$min-number-of-items> -- minimum length of frequent sets found.
+#| C<:$counts> -- should counts be returned or frequencies?.
 #| C<:$sep> -- separator to use in data preprocessing.
 #| C<:$set-set> -- separator to use in transactional database building.
 proto eclat($transactions, |) is export {*}
