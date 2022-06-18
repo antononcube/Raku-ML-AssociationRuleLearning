@@ -8,6 +8,10 @@ role ML::AssociationRuleLearning::RuleFinding {
     ## Find association rules
     ##-------------------------------------------------------
 
+    multi method find-rules(Numeric :$min-confidence!) {
+        return self.find-rules($min-confidence);
+    }
+
     multi method find-rules(Numeric $min-confidence) {
         return self.freqSets.map({ |self.find-rules($_, $min-confidence) }).List;
     }
