@@ -7,14 +7,6 @@ use Hash::Merge;
 
 unit module ML::AssociationRuleLearning;
 
-#------------------------------------------------------------
-sub is-map-of-sets($arr) {
-    $arr ~~ Map and ([and] $arr.map({ $_ ~~ Set }))
-}
-
-sub is-list-of-lists($arr) {
-    $arr ~~ List and ([and] $arr.map({ $_ ~~ List }))
-}
 
 #------------------------------------------------------------
 #| Find frequent sets using the Eclat algorithm.
@@ -31,9 +23,10 @@ multi sub eclat($transactions, Numeric $min-support, *%args) {
 }
 
 multi sub eclat($transactions is copy,
-                Numeric :$min-support!,
+                Numeric :$min-support! is copy,
                 Numeric :$min-number-of-items = 1,
                 Numeric :$max-number-of-items = Inf,
+                Bool :$counts = False,
                 Str :$sep = ':',
                 Str :$set-sep = '∩'
                 ) {
@@ -47,29 +40,22 @@ multi sub eclat($transactions is copy,
         return Nil;
     }
 
-    if is-array-of-hashes($transactions) {
-        # Assuming that we given a dataset
+    if $eclatObj.is-positional-of-maps($transactions) {
+        # Assuming that we given a dataset with named columns.
+        # Each row is a transaction, we concatenate the column names to the column values
+        # and make a list of lists.
         $transactions = $transactions.map({ ($_.keys X~ $sep) Z~ $_.values })>>.List.List;
 
         return eclat($transactions, :$min-support, :$min-number-of-items, :$max-number-of-items, :$sep, :$set-sep);
-
-    } elsif is-map-of-sets($transactions) {
-        # Assuming the we are given a "column-wise" database
-        %itemTransactions = $transactions;
-
-    } elsif is-list-of-lists($transactions) {
-        # List of lists -- "primary" use case
-        my $k = 0;
-        %itemTransactions = cross-tabulate($transactions.map({ |([|$_] X $k++) }), 0, 1)>>.keys>>.List;
-        # I am not sure is this conversion to integer IDs needed --
-        # it does not seem to make the computations faster.
-        # %itemTransactions = %itemTransactions.map({ $_.key => $_.value>>.Int.List }).Hash;
-
-    } else {
-        die 'Do not know how to process the transactions argument.'
     }
 
-    my @res = $eclatObj.frequent-sets(%itemTransactions, :$min-support, :$min-number-of-items, :$max-number-of-items, sep => $set-sep);
+    if $min-support < 0 {
+        die 'The argument min-support is expected to be a non-negative number';
+    }
+
+    $eclatObj.preprocess($transactions);
+    $min-support = $min-support > 1 ?? $min-support / $eclatObj.nTransactions !! $min-support;
+    my @res = $eclatObj.frequent-sets(:$min-support, :$min-number-of-items, :$max-number-of-items, :$counts, sep => $set-sep);
 
     return @res;
 }

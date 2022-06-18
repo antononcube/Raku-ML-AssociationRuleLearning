@@ -1,9 +1,17 @@
 use v6.d;
 
-class ML::AssociationRuleLearning::Eclat {
+use ML::AssociationRuleLearning::Measures;
+use ML::AssociationRuleLearning::Preprocessing;
+use ML::AssociationRuleLearning::RuleFinding;
+
+class ML::AssociationRuleLearning::Eclat
+        does ML::AssociationRuleLearning::Preprocessing
+        does ML::AssociationRuleLearning::Measures
+        does ML::AssociationRuleLearning::RuleFinding {
 
     has %!itemTransactions;
     has @!freqSets;
+    has $.nTransactions is rw = Whatever;
 
     ##-------------------------------------------------------
     ## Intersect transactions items transactions
@@ -40,32 +48,69 @@ class ML::AssociationRuleLearning::Eclat {
     ## Support
     ##-------------------------------------------------------
 
-    multi method support(%itemTrans, $items) {
-        return self.intersect(%itemTrans, $items).elems;
+    multi method support(%itemTrans, $items, Bool :$count = False) {
+        my $tcount = self.intersect(%itemTrans, $items).elems;
+        return $count ?? $tcount !! $tcount / $!nTransactions;
     }
 
-    multi method support(%itemTrans, $items1, $items2) {
-        return self.intersect(%itemTrans, $items1, $items2).elems;
+    multi method support(%itemTrans, $items1, $items2, Bool :$count = False) {
+        my $tcount = self.intersect(%itemTrans, $items1, $items2).elems;
+        return $count ?? $tcount !! $tcount / $!nTransactions;
     }
+
+    ##-------------------------------------------------------
+    ## Preprocess
+    ##-------------------------------------------------------
+    method preprocess($transactions) {
+
+        if self.is-map-of-sets($transactions) {
+            # Assuming the we are given an incidence matrix in "row-wise" form.
+
+            $!nTransactions = $transactions.elems;
+            %!itemTransactions = self.transpose-transaction-sets($transactions);
+
+        } elsif self.is-list-of-lists($transactions) {
+            # List of lists -- "primary" use case
+
+            $!nTransactions = $transactions.elems;
+            %!itemTransactions = self.item-to-transactions-indexes($transactions);
+
+        } else {
+            die 'Do not know how to process the transactions argument.'
+        }
+
+        return %!itemTransactions;
+    }
+
 
     ##-------------------------------------------------------
     ## Eclat
     ##-------------------------------------------------------
 
-    method frequent-sets(%itemTrans,
-                         Numeric :$min-support!,
+    method frequent-sets(Numeric :$min-support!,
                          Numeric :$min-number-of-items = 1,
                          Numeric :$max-number-of-items = Inf,
+                         Bool :$counts = False,
                          Str :$sep = '∩') {
+
+        if !( $!nTransactions ~~ Numeric && $!nTransactions > 0) {
+            die 'No pre-processed transactions. ($!nTransactions is not a positive number).';
+        }
+
+        if ! %!itemTransactions {
+            die 'No pre-processed transactions. (%!itemTransactions is empty).';
+        }
 
         # Reset accumulated frequent sets holder
         @!freqSets = ();
 
-        # Get transactions
-        %!itemTransactions = %itemTrans.clone;
-
         # Find initial frequent sets
-        my @P = %itemTrans.grep({ $_.value.elems ≥ $min-support }).map({ ($_.key,) }).Array;
+        my @P = %!itemTransactions.grep({ $_.value.elems / self.nTransactions ≥ $min-support }).map({ ($_.key,) }).Array;
+
+        if !@P {
+            warn "All items have support less than $min-support (≈{ceiling($min-support * self.nTransactions)} transactions.)";
+            return Empty;
+        }
 
         # Main Eclat loop
         self.find-freq-sets-rec(@P, :$min-support, :$max-number-of-items, :$sep);
@@ -76,7 +121,7 @@ class ML::AssociationRuleLearning::Eclat {
         # Filter by min length
         @res = @res.grep({ $_.elems ≥ $min-number-of-items }).List;
 
-        return @res.map({ $_ => self.support(%!itemTransactions, $_) }).Array;
+        return @res.map({ $_ => self.support(%!itemTransactions, $_, count => $counts) }).Array;
     }
 
     ##-------------------------------------------------------
