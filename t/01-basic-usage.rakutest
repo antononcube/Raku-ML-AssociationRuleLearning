@@ -12,7 +12,7 @@ sub is-list-of-lists($arr) {
     $arr ~~ List and ([and] $arr.map({ $_ ~~ List }))
 }
 
-plan 6;
+plan 8;
 
 ## 1
 use-ok 'Data::ExampleDatasets', 'Data::ExampleDatasets loads ok';
@@ -28,9 +28,15 @@ is is-list-of-lists(@dsTitanic.map({ $_.values.List }).Array), True, 'Expected @
 ok eclat(@dsTitanic, 200);
 
 ## 5
-ok eclat(@dsTitanic, min-support => 200, min-number-of-items => 2, max-number-of-items => 5);
+ok eclat(@dsTitanic, 0.2);
 
 ## 6
+ok eclat(@dsTitanic, min-support => 200, min-number-of-items => 2, max-number-of-items => 5);
+
+## 7
+ok eclat(@dsTitanic, min-support => 200, min-number-of-items => 2, max-number-of-items => 5):counts;
+
+## 8
 ok eclat(@dsTitanic.map({ $_.values.List }).Array, 200);
 
 done-testing;
