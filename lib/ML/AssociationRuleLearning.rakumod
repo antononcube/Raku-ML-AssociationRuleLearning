@@ -7,7 +7,6 @@ use Hash::Merge;
 
 unit module ML::AssociationRuleLearning;
 
-
 #------------------------------------------------------------
 #| Find frequent sets using the Eclat algorithm.
 #| C<$transactions> -- transactions data.
@@ -29,8 +28,8 @@ multi sub eclat($transactions is copy,
                 Numeric :$max-number-of-items = Inf,
                 Bool :$counts = False,
                 Str :$sep = ':',
-                Str :$set-sep = '∩'
-                ) {
+                Str :$set-sep = '∩',
+                Bool :$object = False) {
 
     my ML::AssociationRuleLearning::Eclat $eclatObj .= new;
 
@@ -47,7 +46,7 @@ multi sub eclat($transactions is copy,
         # and make a list of lists.
         $transactions = $transactions.map({ ($_.keys X~ $sep) Z~ $_.values })>>.List.List;
 
-        return eclat($transactions, :$min-support, :$min-number-of-items, :$max-number-of-items, :$sep, :$set-sep);
+        return eclat($transactions, :$min-support, :$min-number-of-items, :$max-number-of-items, :$sep, :$set-sep, :$object);
     }
 
     if $min-support < 0 {
@@ -58,5 +57,40 @@ multi sub eclat($transactions is copy,
     $min-support = $min-support > 1 ?? $min-support / $eclatObj.nTransactions !! $min-support;
     my @res = $eclatObj.frequent-sets(:$min-support, :$min-number-of-items, :$max-number-of-items, :$counts, sep => $set-sep);
 
-    return @res;
+    return $object ?? $eclatObj !! @res;
+}
+
+#------------------------------------------------------------
+#| Find association rules
+proto association-rules($transactions, |) is export {*}
+
+multi sub association-rules($transactions, Numeric $min-support, Numeric $min-confidence, *%args) {
+    return association-rules($transactions, :$min-support, :$min-confidence, |%args);
+}
+
+multi sub association-rules($transactions is copy,
+                            Numeric :$min-support! is copy,
+                            Numeric :$min-confidence! is copy,
+                            Numeric :$min-number-of-items = 1,
+                            Numeric :$max-number-of-items = Inf,
+                            Str :$sep = ':',
+                            Str :$set-sep = '∩',
+                            :$method is copy = Whatever) {
+
+    if $method.isa(Whatever) { $method = 'eclat' };
+
+    if !( $method ~~ Str && $method.lc ∈ <eclat apriori>) {
+        die 'The value of the argument method is expected to be Whatever one of \'Eclat\' or \'Apriori\'.';
+    }
+
+    if $method.lc eq 'apriori' {
+        die "Method 'Apriori' is not implemented yet.";
+    }
+
+    my ML::AssociationRuleLearning::Eclat $eclatObj =
+            eclat($transactions, :$min-support, :$min-number-of-items, :$max-number-of-items, :$sep, :$set-sep):object:!counts;
+
+    my @arules = $eclatObj.find-rules($min-confidence);
+
+    return @arules;
 }

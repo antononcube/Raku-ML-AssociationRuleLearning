@@ -8,7 +8,15 @@ role ML::AssociationRuleLearning::RuleFinding {
     ## Find association rules
     ##-------------------------------------------------------
 
-    method rules(%itemTrans, $items, Numeric $min-confidence) {
+    multi method find-rules(Numeric $min-confidence) {
+        return self.freqSets.map({ |self.find-rules($_, $min-confidence) }).List;
+    }
+
+    multi method find-rules($items, Numeric $min-confidence) {
+        return self.find-rules(self.itemTransactions, $items, $min-confidence);
+    }
+
+    multi method find-rules(%itemTrans, $items, Numeric $min-confidence) {
 
         my @antecedents = $items.combinations[1 .. *- 2];
         my @candidates = @antecedents.map({ $_ => ($items (-) $_).keys.List }).List;

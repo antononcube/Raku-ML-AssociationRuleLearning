@@ -9,9 +9,10 @@ class ML::AssociationRuleLearning::Eclat
         does ML::AssociationRuleLearning::Measures
         does ML::AssociationRuleLearning::RuleFinding {
 
-    has %!itemTransactions;
-    has @!freqSets;
+    has %.itemTransactions;
+    has @.freqSets;
     has $.nTransactions is rw = Whatever;
+    has @.result is rw;
 
     ##-------------------------------------------------------
     ## Intersect transactions items transactions
@@ -121,7 +122,10 @@ class ML::AssociationRuleLearning::Eclat
         # Filter by min length
         @res = @res.grep({ $_.elems ≥ $min-number-of-items }).List;
 
-        return @res.map({ $_ => self.support(%!itemTransactions, $_, count => $counts) }).Array;
+        @res = @res.map({ $_ => self.support(%!itemTransactions, $_, count => $counts) }).Array;
+
+        @!result = @res;
+        return @res;
     }
 
     ##-------------------------------------------------------
