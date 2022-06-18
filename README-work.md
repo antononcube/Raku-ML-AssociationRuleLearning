@@ -83,6 +83,9 @@ $obj = group-by( @dsTitanic, <passengerClass passengerSurvival passengerSex>);
 .say for $obj>>.elems.grep({ $_.value >= 200 });
 ```
 
+**Remark:** `elcat`'s argument `min-support` can take both integers greater than 1 and frequencies between 0 and 1.
+(If an integer greater than one is given, then the corresponding frequency is derived.)
+
 -------
 
 ## Association rules finding
@@ -102,7 +105,7 @@ The function `eclat` takes the adverb ":object" that makes `eclat` return an obj
 Here we find frequent sets, return the corresponding object, and retrieve the result:
 
 ```perl6
-my $eclatObj = eclat(@dsTitanic.map({ $_.values.List }).Array, min-support => 171, min-number-of-items => 2, max-number-of-items => 6):object;
+my $eclatObj = eclat(@dsTitanic.map({ $_.values.List }).Array, min-support => 0.12, min-number-of-items => 2, max-number-of-items => 6):object;
 $eclatObj.result.elems
 ```
 
