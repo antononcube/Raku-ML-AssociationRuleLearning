@@ -16,6 +16,7 @@ unit module ML::AssociationRuleLearning;
 #| C<:$counts> -- should counts be returned or frequencies?.
 #| C<:$sep> -- separator to use in data preprocessing.
 #| C<:$set-set> -- separator to use in transactional database building.
+#| C<:$object> -- should an object be returned or not?
 proto eclat($transactions, |) is export {*}
 
 multi sub eclat($transactions, Numeric $min-support, *%args) {
