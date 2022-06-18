@@ -42,12 +42,9 @@ From GitHub:
 zef install https://github.com/antononcube/Raku-ML-AssociationRuleLearning
 ```
 
-
 -------
 
-## Usage examples
-
-### Frequent sets
+## Frequent sets finding 
 
 Here we get the Titanic dataset (from "Data::Reshapers") and summarize it:
 
@@ -65,7 +62,7 @@ Here is how we use Eclat's implementation to give an answer:
 
 ```perl6
 use ML::AssociationRuleLearning;
-my @freqSets = eclat(@dsTitanic.map({ $_.values.List }).Array, min-support => 200, min-number-of-items => 2, max-number-of-items => Inf);
+my @freqSets = eclat(@dsTitanic.map({ $_.values.List }).Array, min-support => 200, min-number-of-items => 2, max-number-of-items => Inf):counts;
 @freqSets.elems
 ```
 
@@ -86,10 +83,38 @@ $obj = group-by( @dsTitanic, <passengerClass passengerSurvival passengerSex>);
 .say for $obj>>.elems.grep({ $_.value >= 200 });
 ```
 
-### Association rules
+-------
 
-**TBD...**
+## Association rules finding
 
+Here we find association rules with min support 0.3 and min confidence 0.7:
+
+```perl6
+association-rules(@dsTitanic, min-support => 0.3, min-confidence => 0.7)
+==> to-pretty-table
+```
+
+### Reusing found frequent sets
+
+The function `eclat` takes the adverb ":object" that makes `eclat` return an object of type
+`ML::AssociationRuleLearning::Eclat`, which can be "pipelined" to find association rules.
+
+Here we find frequent sets, return the corresponding object, and retrieve the result:
+
+```perl6
+my $eclatObj = eclat(@dsTitanic.map({ $_.values.List }).Array, min-support => 171, min-number-of-items => 2, max-number-of-items => 6):object;
+$eclatObj.result.elems
+```
+
+Here we find association rules and pretty-print them:
+
+```perl6
+$eclatObj.find-rules(min-confidence=>0.7)
+==> to-pretty-table 
+```
+
+**Remark:** Note that because of the specified min confidence, the number of association rules is "contained" --
+a (much) larger number of rules would be produced with, say, `min-confidence=>0.2`.
 
 -------
 

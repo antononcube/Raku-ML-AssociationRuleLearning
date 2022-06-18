@@ -42,12 +42,9 @@ From GitHub:
 zef install https://github.com/antononcube/Raku-ML-AssociationRuleLearning
 ```
 
-
 -------
 
-## Usage examples
-
-### Frequent sets
+## Frequent sets finding 
 
 Here we get the Titanic dataset (from "Data::Reshapers") and summarize it:
 
@@ -58,18 +55,18 @@ my @dsTitanic = get-titanic-dataset();
 records-summary(@dsTitanic);
 ```
 ```
-# +-----------------+----------------+----------------+---------------+-------------------+
-# | id              | passengerClass | passengerAge   | passengerSex  | passengerSurvival |
-# +-----------------+----------------+----------------+---------------+-------------------+
-# | 990     => 1    | 3rd => 709     | 20      => 334 | male   => 843 | died     => 809   |
-# | 286     => 1    | 1st => 323     | -1      => 263 | female => 466 | survived => 500   |
-# | 412     => 1    | 2nd => 277     | 30      => 258 |               |                   |
-# | 837     => 1    |                | 40      => 190 |               |                   |
-# | 465     => 1    |                | 50      => 88  |               |                   |
-# | 1035    => 1    |                | 60      => 57  |               |                   |
-# | 634     => 1    |                | 0       => 56  |               |                   |
-# | (Other) => 1302 |                | (Other) => 63  |               |                   |
-# +-----------------+----------------+----------------+---------------+-------------------+
+# +-------------------+---------------+-----------------+----------------+----------------+
+# | passengerSurvival | passengerSex  | id              | passengerClass | passengerAge   |
+# +-------------------+---------------+-----------------+----------------+----------------+
+# | died     => 809   | male   => 843 | 309     => 1    | 3rd => 709     | 20      => 334 |
+# | survived => 500   | female => 466 | 212     => 1    | 1st => 323     | -1      => 263 |
+# |                   |               | 410     => 1    | 2nd => 277     | 30      => 258 |
+# |                   |               | 74      => 1    |                | 40      => 190 |
+# |                   |               | 1211    => 1    |                | 50      => 88  |
+# |                   |               | 27      => 1    |                | 60      => 57  |
+# |                   |               | 78      => 1    |                | 0       => 56  |
+# |                   |               | (Other) => 1302 |                | (Other) => 63  |
+# +-------------------+---------------+-----------------+----------------+----------------+
 ```
 
 **Problem:** Find all combinations values of the variables "passengerAge", "passengerClass", "passengerSex", and
@@ -79,7 +76,7 @@ Here is how we use Eclat's implementation to give an answer:
 
 ```perl6
 use ML::AssociationRuleLearning;
-my @freqSets = eclat(@dsTitanic.map({ $_.values.List }).Array, min-support => 200, min-number-of-items => 2, max-number-of-items => Inf);
+my @freqSets = eclat(@dsTitanic.map({ $_.values.List }).Array, min-support => 200, min-number-of-items => 2, max-number-of-items => Inf):counts;
 @freqSets.elems
 ```
 ```
@@ -94,21 +91,21 @@ Here we tabulate the result:
 say to-pretty-table(@freqSets.map({ %( Frequent-set => $_.key.join(' '), Support => $_.value) }), align => 'l');
 ```
 ```
-# +---------+-----------------+
-# | Support | Frequent-set    |
-# +---------+-----------------+
-# | 208     | -1 3rd          |
-# | 200     | 1st survived    |
-# | 206     | 20 3rd          |
-# | 208     | 20 died         |
-# | 208     | 20 male         |
-# | 528     | 3rd died        |
-# | 418     | 3rd died male   |
-# | 216     | 3rd female      |
-# | 493     | 3rd male        |
-# | 682     | died male       |
-# | 339     | female survived |
-# +---------+-----------------+
+# +-----------------+---------+
+# | Frequent-set    | Support |
+# +-----------------+---------+
+# | -1 3rd          | 208     |
+# | 1st survived    | 200     |
+# | 20 3rd          | 206     |
+# | 20 died         | 208     |
+# | 20 male         | 208     |
+# | 3rd died        | 528     |
+# | 3rd died male   | 418     |
+# | 3rd female      | 216     |
+# | 3rd male        | 493     |
+# | died male       | 682     |
+# | female survived | 339     |
+# +-----------------+---------+
 ```
 
 We can verify the result by looking into these group counts, [AA2]:
@@ -125,10 +122,69 @@ $obj = group-by( @dsTitanic, <passengerClass passengerSurvival passengerSex>);
 # 3rd.died.male => 418
 ```
 
-### Association rules
+-------
 
-**TBD...**
+## Association rules finding
 
+Here we find association rules with min support 0.3 and min confidence 0.7:
+
+```perl6
+association-rules(@dsTitanic, min-support => 0.3, min-confidence => 0.7)
+==> to-pretty-table
+```
+```
+# +----------+------------+------------------------+----------+-------+----------+------------+-------------------------------------------+
+# | leverage | confidence |       consequent       | support  | count |   lift   | conviction |                antecendent                |
+# +----------+------------+------------------------+----------+-------+----------+------------+-------------------------------------------+
+# | 0.068615 |  0.744711  | passengerSurvival:died | 0.403361 |  528  | 1.204977 |  1.496229  |             passengerClass:3rd            |
+# | 0.122996 |  0.809015  | passengerSurvival:died | 0.521008 |  682  | 1.309025 |  2.000009  |             passengerSex:male             |
+# | 0.122996 |  0.843016  |   passengerSex:male    | 0.521008 |  682  | 1.309025 |  2.267729  |           passengerSurvival:died          |
+# | 0.086564 |  0.847870  | passengerSurvival:died | 0.319328 |  418  | 1.371894 |  2.510823  |    passengerClass:3rd passengerSex:male   |
+# | 0.059562 |  0.791667  |   passengerSex:male    | 0.319328 |  418  | 1.229290 |  1.708785  | passengerClass:3rd passengerSurvival:died |
+# +----------+------------+------------------------+----------+-------+----------+------------+-------------------------------------------+
+```
+
+### Reusing found frequent sets
+
+The function `eclat` takes the adverb ":object" that makes `eclat` return an object of type
+`ML::AssociationRuleLearning::Eclat`, which can be "pipelined" to find association rules.
+
+Here we find frequent sets, return the corresponding object, and retrieve the result:
+
+```perl6
+my $eclatObj = eclat(@dsTitanic.map({ $_.values.List }).Array, min-support => 171, min-number-of-items => 2, max-number-of-items => 6):object;
+$eclatObj.result.elems
+```
+```
+# 18
+```
+
+Here we find association rules and pretty-print them:
+
+```perl6
+$eclatObj.find-rules(min-confidence=>0.7)
+==> to-pretty-table 
+```
+```
+# +-------------+------------+------------+------------+----------+-------+----------+----------+
+# | antecendent | conviction | consequent | confidence | support  | count |   lift   | leverage |
+# +-------------+------------+------------+------------+----------+-------+----------+----------+
+# |     died    |  2.267729  |    male    |  0.843016  | 0.521008 |  682  | 1.309025 | 0.122996 |
+# |     male    |  2.000009  |    died    |  0.809015  | 0.521008 |  682  | 1.309025 | 0.122996 |
+# |   3rd died  |  1.708785  |    male    |  0.791667  | 0.319328 |  418  | 1.229290 | 0.059562 |
+# |   3rd male  |  2.510823  |    died    |  0.847870  | 0.319328 |  418  | 1.371894 | 0.086564 |
+# |   20 died   |  2.313980  |    male    |  0.846154  | 0.134454 |  176  | 1.313897 | 0.032122 |
+# |   20 male   |  2.482811  |    died    |  0.846154  | 0.134454 |  176  | 1.369117 | 0.036249 |
+# |      -1     |  1.200349  |    male    |  0.703422  | 0.141329 |  185  | 1.092265 | 0.011938 |
+# |      -1     |  2.191819  |    3rd     |  0.790875  | 0.158900 |  208  | 1.460162 | 0.050076 |
+# |    female   |  2.267729  |  survived  |  0.727468  | 0.258976 |  339  | 1.904511 | 0.122996 |
+# |     3rd     |  1.496229  |    died    |  0.744711  | 0.403361 |  528  | 1.204977 | 0.068615 |
+# |      -1     |  1.376142  |    died    |  0.722433  | 0.145149 |  190  | 1.168931 | 0.020977 |
+# +-------------+------------+------------+------------+----------+-------+----------+----------+
+```
+
+**Remark:** Note that because of the specified min confidence, the number of association rules is "contained" --
+a (much) larger number of rules would be produced with, say, `min-confidence=>0.2`.
 
 -------
 
