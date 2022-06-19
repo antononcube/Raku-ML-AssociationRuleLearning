@@ -19,7 +19,7 @@ unit module ML::AssociationRuleLearning;
 #| C<:$sep> -- separator to use in data preprocessing.
 #| C<:$set-set> -- separator to use in transactional database building.
 #| C<:$object> -- should an object be returned or not?
-proto apriori($transactions, |) is export {*}
+our proto apriori($transactions, |) is export {*}
 
 multi sub apriori($transactions, Numeric $min-support, *%args) {
     return apriori($transactions, :$min-support, |%args);
@@ -72,7 +72,7 @@ multi sub apriori($transactions is copy,
 #| C<:$sep> -- separator to use in data preprocessing.
 #| C<:$set-set> -- separator to use in transactional database building.
 #| C<:$object> -- should an object be returned or not?
-proto eclat($transactions, |) is export {*}
+our proto eclat($transactions, |) is export {*}
 
 multi sub eclat($transactions, Numeric $min-support, *%args) {
     return eclat($transactions, :$min-support, |%args);
@@ -116,7 +116,7 @@ multi sub eclat($transactions is copy,
 
 #------------------------------------------------------------
 #| Find association rules
-proto association-rules($transactions, |) is export {*}
+our proto association-rules($transactions, |) is export {*}
 
 multi sub association-rules($transactions, Numeric $min-support, Numeric $min-confidence, *%args) {
     return association-rules($transactions, :$min-support, :$min-confidence, |%args);
