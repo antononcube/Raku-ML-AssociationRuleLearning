@@ -137,14 +137,20 @@ multi sub association-rules($transactions is copy,
         die 'The value of the argument method is expected to be Whatever one of \'Eclat\' or \'Apriori\'.';
     }
 
-    my $fsObj;
+    my ML::AssociationRuleLearning::Eclat $eclatObj .= new;
     if $method.lc eq 'apriori' {
-         $fsObj = apriori($transactions, :$min-support, :$min-number-of-items, :$max-number-of-items, :$sep, :$set-sep):object:!counts;
+
+        my ML::AssociationRuleLearning::Apriori $aprioriObj =
+                apriori($transactions, :$min-support, :$min-number-of-items, :$max-number-of-items, :$sep, :$set-sep):object:!counts;
+
+        $eclatObj.preprocess($transactions);
+        $eclatObj.freqSets = $aprioriObj.freqSets;
+
     } else {
-        $fsObj = eclat($transactions, :$min-support, :$min-number-of-items, :$max-number-of-items, :$sep, :$set-sep):object:!counts;
+        $eclatObj = eclat($transactions, :$min-support, :$min-number-of-items, :$max-number-of-items, :$sep, :$set-sep):object:!counts;
     }
 
-    my @arules = $fsObj.find-rules($min-confidence);
+    my @arules = $eclatObj.find-rules($min-confidence);
 
     return @arules;
 }
