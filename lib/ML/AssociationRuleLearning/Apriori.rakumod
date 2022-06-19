@@ -1,15 +1,11 @@
 use v6.d;
 
 use Data::Reshapers;
-use ML::AssociationRuleLearning::Measures;
 use ML::AssociationRuleLearning::Preprocessing;
-use ML::AssociationRuleLearning::RuleFinding;
 use ML::TriesWithFrequencies;
 
 class ML::AssociationRuleLearning::Apriori
-        does ML::AssociationRuleLearning::Preprocessing
-        does ML::AssociationRuleLearning::Measures
-        does ML::AssociationRuleLearning::RuleFinding {
+        does ML::AssociationRuleLearning::Preprocessing {
 
     has @.transactions;
     has @.freqSets;
