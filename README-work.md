@@ -127,6 +127,80 @@ $eclatObj.find-rules(min-confidence=>0.7)
 **Remark:** Note that because of the specified min confidence, the number of association rules is "contained" --
 a (much) larger number of rules would be produced with, say, `min-confidence=>0.2`.
 
+
+-------
+
+## Implementation considerations
+
+### UML diagram
+
+Here is an UML diagram that shows package's structure:
+
+![](./resources/class-diagram.png)
+
+
+The
+[PlantUML spec](./resources/class-diagram.puml)
+and
+[diagram](./resources/class-diagram.png)
+were obtained with the CLI script `to-uml-spec` of the package "UML::Translators", [AAp6].
+
+Here we get the [PlantUML spec](./resources/class-diagram.puml):
+
+```shell
+to-uml-spec ML::AssociationRuleLearning > ./resources/class-diagram.puml
+```
+
+Here get the [diagram](./resources/class-diagram.png):
+
+```shell
+to-uml-spec ML::AssociationRuleLearning | java -jar ~/PlantUML/plantuml-1.2022.5.jar -pipe > ./resources/class-diagram.png
+```
+
+### Eclat
+
+Eclat is based on Raku's 
+[sets, bags, and mixes](https://docs.raku.org/language/setbagmix)
+functionalities.
+
+Eclat represents the transactions as a hash of sets:
+
+- The keys of the hash are items
+
+- The elements of the sets are transaction identifiers.
+
+(In other words, for each item and inverse index is made.)
+
+This representation allows for quick calculation of item combinations support.
+
+We can say the Eclat uses a "vertical database representation" of the transactions.
+
+### Apriori 
+
+Apriori uses the standard, horizontal database transactions representation.
+
+We can say that Apriori:
+
+- Generates candidates for item frequent sets using the routine 
+  [`combinations`](https://docs.raku.org/routine/combinations)
+
+- Filters candidates by 
+  [Tries with frequencies](https://github.com/antononcube/Raku-ML-TriesWithFrequencies) 
+  creation and removal by threshold
+
+Apriori is usually (much) slower than Eclat. 
+Historically, Apriori is the first ARL method, and its implementation in the package is didactic.
+
+### Association rules
+
+We can say that the association rule finding function is a general, but that function
+does require fast computation of confidence, lift, etc. Hence Eclat's transactions representation
+is used.
+
+Association rules finding with Apriori is the same as with Eclat. 
+The package function `assocition-rules` with `method=>'Apriori`
+simply sends Apriori found frequent sets to the Eclat based association rule finding.
+
 -------
 
 ## References
@@ -170,6 +244,11 @@ a (much) larger number of rules would be produced with, say, `min-confidence=>0.
 [AAp5] Anton Antonov,
 [Data::Summarizers Raku package](https://github.com/antononcube/Raku-Data-Summarizers),
 (2021),
+[GitHub/antononcube](https://github.com/antononcube).
+
+[AAp6] Anton Antonov,
+[UML::Translators Raku package](https://github.com/antononcube/Raku-UML-Translators),
+(2022),
 [GitHub/antononcube](https://github.com/antononcube).
 
 
