@@ -12,7 +12,7 @@ sub is-list-of-lists($arr) {
     $arr ~~ List and ([and] $arr.map({ $_ ~~ List }))
 }
 
-plan 8;
+plan 13;
 
 ## 1
 use-ok 'Data::ExampleDatasets', 'Data::ExampleDatasets loads ok';
@@ -38,5 +38,20 @@ ok eclat(@dsTitanic, min-support => 200, min-number-of-items => 2, max-number-of
 
 ## 8
 ok eclat(@dsTitanic.map({ $_.values.List }).Array, 200);
+
+## 9
+ok apriori(@dsTitanic, 200);
+
+## 10
+ok apriori(@dsTitanic, 0.2);
+
+## 11
+ok apriori(@dsTitanic, min-support => 200, min-number-of-items => 2, max-number-of-items => 3);
+
+## 12
+ok apriori(@dsTitanic, min-support => 200, min-number-of-items => 2, max-number-of-items => 3):counts;
+
+## 13
+ok apriori(@dsTitanic.map({ $_.values.List }).Array, 200);
 
 done-testing;
