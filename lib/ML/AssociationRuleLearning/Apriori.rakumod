@@ -132,7 +132,7 @@ class ML::AssociationRuleLearning::Apriori
         @res = @res.grep({ $_.elems ≥ $min-number-of-items }).List;
 
         # Get counts from tries
-        @res = @res.map({ $_ => %allTries{$_.elems}.retrieve($_).value }).Array;
+        @res = @res.map({ $_.List => %allTries{$_.elems}.retrieve($_).value }).Array;
 
         # Counts to supports
         if !$counts {
