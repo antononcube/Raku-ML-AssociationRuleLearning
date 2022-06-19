@@ -1,5 +1,8 @@
 # Raku ML::AssociationRuleLearning
 
+[![SparkyCI](http://sparrowhub.io:2222/project/gh-antononcube-Raku-ML-AssociationRuleLearning/badge)](http://sparrowhub.io:2222)
+[![License: Artistic-2.0](https://img.shields.io/badge/License-Artistic%202.0-0298c3.svg)](https://opensource.org/licenses/Artistic-2.0)
+
 Raku package for association rule learning.
 
 This repository has the code of a Raku package for
