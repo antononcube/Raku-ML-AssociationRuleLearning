@@ -137,7 +137,7 @@ class ML::AssociationRuleLearning::Apriori
 
         # Filter by min length
         @res = @res.grep({ $_.elems ≥ $min-number-of-items }).List;
-        note '@res : ', @res;
+
         # Get counts from tries
         @res = @res.map({ $_ => %allTries{$_.elems}.retrieve($_).value }).Array;
 
