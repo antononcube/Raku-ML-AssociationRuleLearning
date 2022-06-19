@@ -1,0 +1,109 @@
+@startuml
+class ML::AssociationRuleLearning::Preprocessing <<role>> {
+  {method} is-list-of-lists
+  {method} is-map-of-sets
+  {method} is-positional-of-maps
+  {method} item-to-transactions-indexes
+  {method} really-flat
+  {method} tally
+  {method} transpose-transaction-sets
+}
+
+
+class "association-rules" <<routine>> {
+}
+"association-rules" --|> Routine
+"association-rules" --|> Block
+"association-rules" --|> Code
+"association-rules" --|> Callable
+
+
+class "eclat" <<routine>> {
+}
+"eclat" --|> Routine
+"eclat" --|> Block
+"eclat" --|> Code
+"eclat" --|> Callable
+
+
+class ML::AssociationRuleLearning::Apriori  {
+  {field} $!freqEnough
+  {field} $!nTransactions
+  {field} $!trTrans
+  {field} @!freqSets
+  {field} @!result
+  {field} @!transactions
+  {method} BUILDALL
+  {method} freqSets
+  {method} frequent-sets
+  {method} is-list-of-lists
+  {method} is-map-of-sets
+  {method} is-positional-of-maps
+  {method} item-to-transactions-indexes
+  {method} nTransactions
+  {method} preprocess
+  {method} really-flat
+  {method} result
+  {method} scan-transaction
+  {method} tally
+  {method} transactions
+  {method} transpose-transaction-sets
+}
+ML::AssociationRuleLearning::Apriori --|> ML::AssociationRuleLearning::Preprocessing
+
+
+class ML::AssociationRuleLearning::RuleFinding <<role>> {
+}
+
+
+class ML::AssociationRuleLearning::Measures <<role>> {
+  {method} confidence
+  {method} convication
+  {method} leverage
+  {method} lift
+}
+
+
+class ML::AssociationRuleLearning::Eclat  {
+  {field} $!nTransactions
+  {field} %!itemTransactions
+  {field} @!freqSets
+  {field} @!result
+  {method} BUILDALL
+  {method} confidence
+  {method} convication
+  {method} extend
+  {method} find-freq-sets-rec
+  {method} find-rules
+  {method} freqSets
+  {method} frequent-sets
+  {method} intersect
+  {method} is-list-of-lists
+  {method} is-map-of-sets
+  {method} is-positional-of-maps
+  {method} item-to-transactions-indexes
+  {method} itemTransactions
+  {method} leverage
+  {method} lift
+  {method} nTransactions
+  {method} preprocess
+  {method} really-flat
+  {method} result
+  {method} support
+  {method} tally
+  {method} transpose-transaction-sets
+}
+ML::AssociationRuleLearning::Eclat --|> ML::AssociationRuleLearning::Measures
+ML::AssociationRuleLearning::Eclat --|> ML::AssociationRuleLearning::Preprocessing
+ML::AssociationRuleLearning::Eclat --|> ML::AssociationRuleLearning::RuleFinding
+
+
+class "apriori" <<routine>> {
+}
+"apriori" --|> Routine
+"apriori" --|> Block
+"apriori" --|> Code
+"apriori" --|> Callable
+
+
+@enduml
