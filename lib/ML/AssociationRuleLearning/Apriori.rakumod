@@ -24,9 +24,7 @@ class ML::AssociationRuleLearning::Apriori
     ##-------------------------------------------------------
 
     method scan-transaction($trans, Int $k, Str :$sep = '∩') {
-        #say $k, ' : trans : ', $trans;
-        my @candidates = $trans.rotor($k => -1);
-        #say $k, ' : cand : ', @candidates;
+        my @candidates = $trans.combinations($k);
         return @candidates.grep({ $_[^($_.elems-1)].join($sep) ∈ $!freqEnough && $_.tail ∈ $!freqEnough}).List;
     }
 
@@ -49,13 +47,13 @@ class ML::AssociationRuleLearning::Apriori
             # Assuming the we are given an incidence matrix in "row-wise" form.
 
             $!nTransactions = $transData.elems;
-            @!transactions = $transData.map({ $_.keys }).Array;
+            @!transactions = $transData.map({ $_.keys }).sort.Array;
 
         } elsif self.is-list-of-lists($transData) {
             # List of lists -- "primary" use case
 
             $!nTransactions = $transData.elems;
-            @!transactions = |$transData;
+            @!transactions = $transData.map({ $_.unique.sort.Array }).Array;
 
         } else {
             die 'Do not know how to process the transactions argument.'
@@ -101,7 +99,6 @@ class ML::AssociationRuleLearning::Apriori
 
         # Initial set of frequent sets
         $!freqEnough = Set($trBase.words.grep({ $_.elems == 1 }).List);
-        say $!freqEnough.raku;
 
         # Gather the first trie
         my %allTries = 1 => $trBase;
@@ -109,8 +106,13 @@ class ML::AssociationRuleLearning::Apriori
         # Main Apriori loop
         for (2...$max-number-of-items) -> $k {
 
-            # Scan the transactions and make trie with viable candidates
+            # Scan the transactions and get viable candidates
             my @candidates = flatten( @!transactions.map({ self.scan-transaction($_, $k, :$sep) }), max-level=>1);
+
+            # Check should exit the loop
+            last if !@candidates;
+
+            # Make trie with viable candidates
             my $trSets = trie-create(@candidates);
 
             # Remove transactions that are not frequent enough
@@ -135,14 +137,16 @@ class ML::AssociationRuleLearning::Apriori
 
         # Filter by min length
         @res = @res.grep({ $_.elems ≥ $min-number-of-items }).List;
-
-        # Get support form tries
+        note '@res : ', @res;
+        # Get counts from tries
         @res = @res.map({ $_ => %allTries{$_.elems}.retrieve($_).value }).Array;
 
+        # Counts to supports
         if !$counts {
             @res = @res.map({ $_.key => $_.value / $!nTransactions }).Array;
         }
 
+        # Result
         @!result = @res;
         return @res;
     }
