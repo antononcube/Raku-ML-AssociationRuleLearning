@@ -62,19 +62,19 @@ class ML::AssociationRuleLearning::Eclat
     ##-------------------------------------------------------
     ## Preprocess
     ##-------------------------------------------------------
-    method preprocess($transactions) {
+    method preprocess($transData) {
 
-        if self.is-map-of-sets($transactions) {
+        if self.is-map-of-sets($transData) {
             # Assuming the we are given an incidence matrix in "row-wise" form.
 
-            $!nTransactions = $transactions.elems;
-            %!itemTransactions = self.transpose-transaction-sets($transactions);
+            $!nTransactions = $transData.elems;
+            %!itemTransactions = self.transpose-transaction-sets($transData);
 
-        } elsif self.is-list-of-lists($transactions) {
+        } elsif self.is-list-of-lists($transData) {
             # List of lists -- "primary" use case
 
-            $!nTransactions = $transactions.elems;
-            %!itemTransactions = self.item-to-transactions-indexes($transactions);
+            $!nTransactions = $transData.elems;
+            %!itemTransactions = self.item-to-transactions-indexes($transData);
 
         } else {
             die 'Do not know how to process the transactions argument.'
