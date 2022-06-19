@@ -137,7 +137,7 @@ a (much) larger number of rules would be produced with, say, `min-confidence=>0.
 
 ### UML diagram
 
-Here is an UML diagram that shows package's structure:
+Here is a UML diagram that shows package's structure:
 
 ![](./resources/class-diagram.png)
 
@@ -162,6 +162,8 @@ to-uml-spec ML::AssociationRuleLearning | java -jar ~/PlantUML/plantuml-1.2022.5
 
 ### Eclat
 
+We can say that Eclat uses a "vertical database representation" of the transactions.
+
 Eclat is based on Raku's 
 [sets, bags, and mixes](https://docs.raku.org/language/setbagmix)
 functionalities.
@@ -172,11 +174,9 @@ Eclat represents the transactions as a hash of sets:
 
 - The elements of the sets are transaction identifiers.
 
-(In other words, for each item and inverse index is made.)
+(In other words, for each item an inverse index is made.)
 
-This representation allows for quick calculation of item combinations support.
-
-We can say the Eclat uses a "vertical database representation" of the transactions.
+This representation allows for quick calculations of item combinations support.
 
 ### Apriori 
 
@@ -196,13 +196,13 @@ Historically, Apriori is the first ARL method, and its implementation in the pac
 
 ### Association rules
 
-We can say that the association rule finding function is a general, but that function
+We can say that the association rule finding function is a general one, but that function
 does require fast computation of confidence, lift, etc. Hence Eclat's transactions representation
 is used.
 
 Association rules finding with Apriori is the same as with Eclat. 
-The package function `assocition-rules` with `method=>'Apriori`
-simply sends Apriori found frequent sets to the Eclat based association rule finding.
+The package function `assocition-rules` with the option setting `method=>'Apriori'`
+simply sends frequent sets found with Apriori to the Eclat based association rule finding.
 
 -------
 
