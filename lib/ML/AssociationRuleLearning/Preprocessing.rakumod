@@ -20,6 +20,24 @@ role ML::AssociationRuleLearning::Preprocessing {
     }
 
     ##-------------------------------------------------------
+    ## Tally
+    ##-------------------------------------------------------
+    ## To be added in Data::Summarizers
+    method tally(@data) {
+        my %counts;
+        %counts{$_}++ for @data;
+        return %counts;
+    }
+
+    ##-------------------------------------------------------
+    ## Really flat
+    ##-------------------------------------------------------
+    ## To be added in Data::Reshapers
+    method really-flat (+@list) {
+        gather @list.deepmap: *.take
+    }
+
+    ##-------------------------------------------------------
     ## Item to transactions indexes
     ##-------------------------------------------------------
     ## Vertical transactions database
