@@ -19,20 +19,16 @@ class ML::AssociationRuleLearning::Apriori
     ## Scan transaction
     ##-------------------------------------------------------
 
-    method scan-transaction($trans, Int $k, Str :$sep = '∩') {
+    method scan-transaction($trans, Int $k, Str :$sep = '∩', Bool :$candidate-sort = False) {
         my @candidates = $trans.combinations($k);
+        # It looks like the function combinations produces lists in which
+        # the elements appear in the same order as in the original list.
+        # I do not think that is guaranteed, so there is an option to sort the lists
+        # after they are generated.
+        if $candidate-sort { @candidates = @candidates.map({ $_.sort.List }).List }
         return @candidates.grep({ $_[^($_.elems-1)].join($sep) ∈ $!freqEnough && $_.tail ∈ $!freqEnough}).List;
     }
 
-    ##-------------------------------------------------------
-    ## Support
-    ##-------------------------------------------------------
-
-    multi method support($tr, $items, Bool :$count = False) {
-    }
-
-    multi method support($tr, $items1, $items2, Bool :$count = False) {
-    }
 
     ##-------------------------------------------------------
     ## Preprocess
@@ -67,7 +63,8 @@ class ML::AssociationRuleLearning::Apriori
                          Numeric :$min-number-of-items = 1,
                          Numeric :$max-number-of-items = Inf,
                          Bool :$counts = False,
-                         Str :$sep = '∩') {
+                         Str :$sep = '∩',
+                         Bool :$candidate-sort = False) {
 
         if !($!nTransactions ~~ Numeric && $!nTransactions > 0) {
             die 'No pre-processed transactions. ($!nTransactions is not a positive number).';
@@ -103,7 +100,7 @@ class ML::AssociationRuleLearning::Apriori
         for (2...$max-number-of-items) -> $k {
 
             # Scan the transactions and get viable candidates
-            my @candidates = flatten( @!transactions.map({ self.scan-transaction($_, $k, :$sep) }), max-level=>1);
+            my @candidates = flatten( @!transactions.map({ self.scan-transaction($_, $k, :$sep, :$candidate-sort) }), max-level=>1);
 
             # Check should exit the loop
             last if !@candidates;
