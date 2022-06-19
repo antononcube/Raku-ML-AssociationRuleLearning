@@ -12,7 +12,7 @@ sub is-list-of-lists($arr) {
     $arr ~~ List and ([and] $arr.map({ $_ ~~ List }))
 }
 
-plan 13;
+plan 15;
 
 ## 1
 use-ok 'Data::ExampleDatasets', 'Data::ExampleDatasets loads ok';
@@ -53,5 +53,11 @@ ok apriori(@dsTitanic, min-support => 200, min-number-of-items => 2, max-number-
 
 ## 13
 ok apriori(@dsTitanic.map({ $_.values.List }).Array, 200);
+
+## 14
+ok association-rules(@dsTitanic.map({ $_.values.List }).Array, method => 'eclat', min-support => 0.1, min-confidence => 0.7, min-number-of-items => 2, max-number-of-items => 3);
+
+## 15
+ok association-rules(@dsTitanic.map({ $_.values.List }).Array, method => 'apriori', min-support => 0.3, min-confidence => 0.7, min-number-of-items => 2, max-number-of-items => 2);
 
 done-testing;
