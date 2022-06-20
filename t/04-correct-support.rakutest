@@ -8,11 +8,6 @@ use ML::AssociationRuleLearning;
 use Data::ExampleDatasets;
 use Data::Reshapers;
 
-
-sub is-list-of-lists($arr) {
-    $arr ~~ List and ([and] $arr.map({ $_ ~~ List }))
-}
-
 plan 3;
 
 ## 1

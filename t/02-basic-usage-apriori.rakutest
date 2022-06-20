@@ -1,0 +1,30 @@
+use v6.d;
+use Test;
+
+use lib '.';
+use lib './lib';
+
+use ML::AssociationRuleLearning;
+use Data::ExampleDatasets;
+use Data::Reshapers;
+
+my @dsTitanic = get-titanic-dataset();
+
+plan 5;
+
+## 1
+ok apriori(@dsTitanic, 200);
+
+## 2
+ok apriori(@dsTitanic, 0.2);
+
+## 3
+ok apriori(@dsTitanic, min-support => 200, min-number-of-items => 2, max-number-of-items => 5);
+
+## 4
+ok apriori(@dsTitanic, min-support => 200, min-number-of-items => 2, max-number-of-items => 5):counts;
+
+## 5
+ok apriori(@dsTitanic.map({ $_.values.List }).Array, 200);
+
+done-testing;
