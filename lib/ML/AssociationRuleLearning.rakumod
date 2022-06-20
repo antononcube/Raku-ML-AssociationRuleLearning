@@ -47,7 +47,7 @@ multi sub apriori($transactions is copy,
         # and make a list of lists.
         $transactions = $transactions.map({ ($_.keys X~ $sep) Z~ $_.values })>>.List.List;
 
-        return apriori($transactions, :$min-support, :$min-number-of-items, :$max-number-of-items, :$sep, :$set-sep, :$object);
+        return apriori($transactions, :$min-support, :$min-number-of-items, :$max-number-of-items, :$sep, :$set-sep, :$object, :$counts);
     }
 
     if $min-support < 0 {
@@ -100,7 +100,7 @@ multi sub eclat($transactions is copy,
         # and make a list of lists.
         $transactions = $transactions.map({ ($_.keys X~ $sep) Z~ $_.values })>>.List.List;
 
-        return eclat($transactions, :$min-support, :$min-number-of-items, :$max-number-of-items, :$sep, :$set-sep, :$object);
+        return eclat($transactions, :$min-support, :$min-number-of-items, :$max-number-of-items, :$sep, :$set-sep, :$object, :$counts);
     }
 
     if $min-support < 0 {
