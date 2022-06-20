@@ -19,46 +19,8 @@ unit module ML::AssociationRuleLearning;
 #| C<:$sep> -- separator to use in data preprocessing.
 #| C<:$set-set> -- separator to use in transactional database building.
 #| C<:$object> -- should an object be returned or not?
-our proto apriori($transactions, |) is export {*}
-
-multi sub apriori($transactions, Numeric $min-support, *%args) {
-    return apriori($transactions, :$min-support, |%args);
-}
-
-multi sub apriori($transactions is copy,
-                Numeric :$min-support! is copy,
-                Numeric :$min-number-of-items = 1,
-                Numeric :$max-number-of-items = Inf,
-                Bool :$counts = False,
-                Str :$sep = ':',
-                Str :$set-sep = '∩',
-                Bool :$object = False) {
-
-    my ML::AssociationRuleLearning::Apriori $aprioriObj .= new;
-
-    if $transactions.elems == 0 {
-        warn 'Empty transactions.';
-        return Nil;
-    }
-
-    if $aprioriObj.is-positional-of-maps($transactions) {
-        # Assuming that we given a dataset with named columns.
-        # Each row is a transaction, we concatenate the column names to the column values
-        # and make a list of lists.
-        $transactions = $transactions.map({ ($_.keys X~ $sep) Z~ $_.values })>>.List.List;
-
-        return apriori($transactions, :$min-support, :$min-number-of-items, :$max-number-of-items, :$sep, :$set-sep, :$object, :$counts);
-    }
-
-    if $min-support < 0 {
-        die 'The argument min-support is expected to be a non-negative number';
-    }
-
-    $aprioriObj.preprocess($transactions);
-    $min-support = $min-support > 1 ?? $min-support / $aprioriObj.nTransactions !! $min-support;
-    my @res = $aprioriObj.frequent-sets(:$min-support, :$min-number-of-items, :$max-number-of-items, :$counts, sep => $set-sep);
-
-    return $object ?? $aprioriObj !! @res;
+our sub apriori($transactions, *@args, *%args) is export {
+    return frequent-sets($transactions, |@args, method => 'Apriori', |%args);
 }
 
 
@@ -72,46 +34,75 @@ multi sub apriori($transactions is copy,
 #| C<:$sep> -- separator to use in data preprocessing.
 #| C<:$set-set> -- separator to use in transactional database building.
 #| C<:$object> -- should an object be returned or not?
-our proto eclat($transactions, |) is export {*}
-
-multi sub eclat($transactions, Numeric $min-support, *%args) {
-    return eclat($transactions, :$min-support, |%args);
+our sub eclat($transactions, *@args, *%args) is export {
+    return frequent-sets($transactions, |@args, method => 'Eclat', |%args);
 }
 
-multi sub eclat($transactions is copy,
-                Numeric :$min-support! is copy,
-                Numeric :$min-number-of-items = 1,
-                Numeric :$max-number-of-items = Inf,
-                Bool :$counts = False,
-                Str :$sep = ':',
-                Str :$set-sep = '∩',
-                Bool :$object = False) {
 
-    my ML::AssociationRuleLearning::Eclat $eclatObj .= new;
+#------------------------------------------------------------
+#| Find frequent sets.
+#| C<$transactions> -- transactions data.
+#| C<:$min-support> -- minimum support for frequent sets found; can be an integer or a frequency.
+#| C<:$max-number-of-items> -- maximum length of frequent sets found.
+#| C<:$min-number-of-items> -- minimum length of frequent sets found.
+#| C<:$method> -- method to use, one of Whatever, 'Apriori', or 'Eclat'.
+#| C<:$counts> -- should counts be returned or frequencies?.
+#| C<:$sep> -- separator to use in data preprocessing.
+#| C<:$set-set> -- separator to use in transactional database building.
+#| C<:$object> -- should an object be returned or not?
+our proto frequent-sets($transactions, |) is export {*}
+
+multi sub frequent-sets($transactions, Numeric $min-support, *%args) {
+    return frequent-sets($transactions, :$min-support, |%args);
+}
+
+multi sub frequent-sets($transactions is copy,
+                        Numeric :$min-support! is copy,
+                        Numeric :$min-number-of-items = 1,
+                        Numeric :$max-number-of-items = Inf,
+                        :$method is copy = Whatever,
+                        Bool :$counts = False,
+                        Str :$sep = ':',
+                        Str :$set-sep = '∩',
+                        Bool :$object = False) {
+
+
+    if $method.isa(Whatever) { $method = 'Eclat' };
+
+    if !($method ~~ Str && $method.lc ∈ <eclat apriori>) {
+        die 'The value of the argument method is expected to be Whatever one of \'Eclat\' or \'Apriori\'.';
+    }
 
     if $transactions.elems == 0 {
         warn 'Empty transactions.';
         return Nil;
     }
 
-    if $eclatObj.is-positional-of-maps($transactions) {
+    my $fsObj;
+    if $method.lc eq 'apriori' {
+        $fsObj = ML::AssociationRuleLearning::Apriori.new;
+    } else {
+        $fsObj = ML::AssociationRuleLearning::Eclat.new;
+    }
+
+    if $fsObj.is-positional-of-maps($transactions) {
         # Assuming that we given a dataset with named columns.
         # Each row is a transaction, we concatenate the column names to the column values
         # and make a list of lists.
         $transactions = $transactions.map({ ($_.keys X~ $sep) Z~ $_.values })>>.List.List;
 
-        return eclat($transactions, :$min-support, :$min-number-of-items, :$max-number-of-items, :$sep, :$set-sep, :$object, :$counts);
+        return frequent-sets($transactions, :$min-support, :$min-number-of-items, :$max-number-of-items, :$method, :$sep, :$set-sep, :$object, :$counts);
     }
 
     if $min-support < 0 {
         die 'The argument min-support is expected to be a non-negative number';
     }
 
-    $eclatObj.preprocess($transactions);
-    $min-support = $min-support > 1 ?? $min-support / $eclatObj.nTransactions !! $min-support;
-    my @res = $eclatObj.frequent-sets(:$min-support, :$min-number-of-items, :$max-number-of-items, :$counts, sep => $set-sep);
+    $fsObj.preprocess($transactions);
+    $min-support = $min-support > 1 ?? $min-support / $fsObj.nTransactions !! $min-support;
+    my @res = $fsObj.frequent-sets(:$min-support, :$min-number-of-items, :$max-number-of-items, :$counts, sep => $set-sep);
 
-    return $object ?? $eclatObj !! @res;
+    return $object ?? $fsObj !! @res;
 }
 
 #------------------------------------------------------------
@@ -127,13 +118,13 @@ multi sub association-rules($transactions is copy,
                             Numeric :$min-confidence! is copy,
                             Numeric :$min-number-of-items = 1,
                             Numeric :$max-number-of-items = Inf,
+                            :$method is copy = Whatever,
                             Str :$sep = ':',
-                            Str :$set-sep = '∩',
-                            :$method is copy = Whatever) {
+                            Str :$set-sep = '∩') {
 
-    if $method.isa(Whatever) { $method = 'eclat' };
+    if $method.isa(Whatever) { $method = 'Eclat' };
 
-    if !( $method ~~ Str && $method.lc ∈ <eclat apriori>) {
+    if !($method ~~ Str && $method.lc ∈ <eclat apriori>) {
         die 'The value of the argument method is expected to be Whatever one of \'Eclat\' or \'Apriori\'.';
     }
 
@@ -147,7 +138,8 @@ multi sub association-rules($transactions is copy,
         $eclatObj.freqSets = $aprioriObj.freqSets;
 
     } else {
-        $eclatObj = eclat($transactions, :$min-support, :$min-number-of-items, :$max-number-of-items, :$sep, :$set-sep):object:!counts;
+        $eclatObj = eclat($transactions, :$min-support, :$min-number-of-items, :$max-number-of-items, :$sep,
+                :$set-sep):object:!counts;
     }
 
     my @arules = $eclatObj.find-rules($min-confidence);
