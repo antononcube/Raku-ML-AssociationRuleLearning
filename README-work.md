@@ -3,8 +3,6 @@
 [![SparkyCI](http://sparrowhub.io:2222/project/gh-antononcube-Raku-ML-AssociationRuleLearning/badge)](http://sparrowhub.io:2222)
 [![License: Artistic-2.0](https://img.shields.io/badge/License-Artistic%202.0-0298c3.svg)](https://opensource.org/licenses/Artistic-2.0)
 
-Raku package for association rule learning.
-
 This repository has the code of a Raku package for
 [Association Rule Learning (ARL)](https://en.wikipedia.org/wiki/Association_rule_learning)
 functions, [Wk1].
@@ -59,7 +57,7 @@ records-summary(@dsTitanic);
 ```
 
 **Problem:** Find all combinations values of the variables "passengerAge", "passengerClass", "passengerSex", and
-"passengerSurvival" that appear more 200 times in the Titanic dataset.
+"passengerSurvival" that appear more than 200 times in the Titanic dataset.
 
 Here is how we use Eclat's implementation to give an answer:
 
@@ -84,6 +82,14 @@ my $obj = group-by( @dsTitanic, <passengerClass passengerSex>);
 .say for $obj>>.elems.grep({ $_.value >= 200 });
 $obj = group-by( @dsTitanic, <passengerClass passengerSurvival passengerSex>);
 .say for $obj>>.elems.grep({ $_.value >= 200 });
+```
+
+Or these contingency tables:
+
+```perl6
+my $obj = group-by( @dsTitanic, "passengerClass") ;
+$obj = $obj.map({ $_.key => cross-tabulate( $_.value, "passengerSex", "passengerSurvival" ) });
+.say for $obj.Array;
 ```
 
 **Remark:** For datasets -- i.e. arrays of hashes -- `eclat` preprocess the data by concatenating
@@ -229,29 +235,38 @@ simply sends frequent sets found with Apriori to the Eclat based association rul
 (2014-2016),
 [MathematicaForPrediction at GitHub/antononcube](https://github.com/antononcube/MathematicaForPrediction/).
 
+[AAp1a] Anton Antonov
+[Implementation of the Apriori algorithm via Tries in Mathematica](https://github.com/antononcube/MathematicaForPrediction/blob/master/Misc/AprioriAlgorithmViaTries.m),
+(2022),
+[MathematicaForPrediction at GitHub/antononcube](https://github.com/antononcube/MathematicaForPrediction/).
+
 [AAp2] Anton Antonov,
 [Implementation of the Eclat algorithm in Mathematica](https://github.com/antononcube/MathematicaForPrediction/blob/master/EclatAlgorithm.m),
 (2022),
 [MathematicaForPrediction at GitHub/antononcube](https://github.com/antononcube/MathematicaForPrediction/).
 
 [AAp3] Anton Antonov,
-[Data::Generators Raku package](https://github.com/antononcube/Raku-Data-Generators),
+[Data::Generators Raku package](https://raku.land/cpan:ANTONOV/Data::Generators),
 (2021),
 [GitHub/antononcube](https://github.com/antononcube).
 
 [AAp4] Anton Antonov,
-[Data::Reshapers Raku package](https://github.com/antononcube/Raku-Data-Reshapers),
+[Data::Reshapers Raku package](https://raku.land/cpan:ANTONOV/Data::Reshapers),
 (2021),
 [GitHub/antononcube](https://github.com/antononcube).
 
 [AAp5] Anton Antonov,
-[Data::Summarizers Raku package](https://github.com/antononcube/Raku-Data-Summarizers),
+[Data::Summarizers Raku package](https://raku.land/cpan:ANTONOV/Data::Summarizers),
 (2021),
 [GitHub/antononcube](https://github.com/antononcube).
 
 [AAp6] Anton Antonov,
-[UML::Translators Raku package](https://github.com/antononcube/Raku-UML-Translators),
+[UML::Translators Raku package](https://raku.land/zef:antononcube/UML::Translators),
 (2022),
 [GitHub/antononcube](https://github.com/antononcube).
 
+[AAp7] Anton Antonov,
+[ML::TrieWithFrequencies Raku package](https://raku.land/cpan:ANTONOV/ML::TriesWithFrequencies),
+(2021),
+[GitHub/antononcube](https://github.com/antononcube).
 

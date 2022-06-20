@@ -3,8 +3,6 @@
 [![SparkyCI](http://sparrowhub.io:2222/project/gh-antononcube-Raku-ML-AssociationRuleLearning/badge)](http://sparrowhub.io:2222)
 [![License: Artistic-2.0](https://img.shields.io/badge/License-Artistic%202.0-0298c3.svg)](https://opensource.org/licenses/Artistic-2.0)
 
-Raku package for association rule learning.
-
 This repository has the code of a Raku package for
 [Association Rule Learning (ARL)](https://en.wikipedia.org/wiki/Association_rule_learning)
 functions, [Wk1].
@@ -61,19 +59,19 @@ records-summary(@dsTitanic);
 # +-----------------+---------------+----------------+----------------+-------------------+
 # | id              | passengerSex  | passengerClass | passengerAge   | passengerSurvival |
 # +-----------------+---------------+----------------+----------------+-------------------+
-# | 220     => 1    | male   => 843 | 3rd => 709     | 20      => 334 | died     => 809   |
-# | 985     => 1    | female => 466 | 1st => 323     | -1      => 263 | survived => 500   |
-# | 776     => 1    |               | 2nd => 277     | 30      => 258 |                   |
-# | 76      => 1    |               |                | 40      => 190 |                   |
-# | 1150    => 1    |               |                | 50      => 88  |                   |
-# | 491     => 1    |               |                | 60      => 57  |                   |
-# | 882     => 1    |               |                | 0       => 56  |                   |
+# | 904     => 1    | male   => 843 | 3rd => 709     | 20      => 334 | died     => 809   |
+# | 1253    => 1    | female => 466 | 1st => 323     | -1      => 263 | survived => 500   |
+# | 1187    => 1    |               | 2nd => 277     | 30      => 258 |                   |
+# | 66      => 1    |               |                | 40      => 190 |                   |
+# | 393     => 1    |               |                | 50      => 88  |                   |
+# | 371     => 1    |               |                | 60      => 57  |                   |
+# | 485     => 1    |               |                | 0       => 56  |                   |
 # | (Other) => 1302 |               |                | (Other) => 63  |                   |
 # +-----------------+---------------+----------------+----------------+-------------------+
 ```
 
 **Problem:** Find all combinations values of the variables "passengerAge", "passengerClass", "passengerSex", and
-"passengerSurvival" that appear more 200 times in the Titanic dataset.
+"passengerSurvival" that appear more than 200 times in the Titanic dataset.
 
 Here is how we use Eclat's implementation to give an answer:
 
@@ -120,9 +118,22 @@ $obj = group-by( @dsTitanic, <passengerClass passengerSurvival passengerSex>);
 .say for $obj>>.elems.grep({ $_.value >= 200 });
 ```
 ```
-# 3rd.female => 216
 # 3rd.male => 493
+# 3rd.female => 216
 # 3rd.died.male => 418
+```
+
+Or these contingency tables:
+
+```perl6
+my $obj = group-by( @dsTitanic, "passengerClass") ;
+$obj = $obj.map({ $_.key => cross-tabulate( $_.value, "passengerSex", "passengerSurvival" ) });
+.say for $obj.Array;
+```
+```
+# 1st => {female => {died => 5, survived => 139}, male => {died => 118, survived => 61}}
+# 2nd => {female => {died => 12, survived => 94}, male => {died => 146, survived => 25}}
+# 3rd => {female => {died => 110, survived => 106}, male => {died => 418, survived => 75}}
 ```
 
 **Remark:** For datasets -- i.e. arrays of hashes -- `eclat` preprocess the data by concatenating
@@ -133,7 +144,7 @@ different columns. If that concatenation is not desired manual preprocessing lik
 @dsTitanic.map({ $_.values.List }).Array
 ```
 ```
-# [(female 30 survived 1st 1) (0 2 1st male survived) (female 0 1st died 3) (male 1st died 30 4) (20 died 5 female 1st) (1st survived 50 male 6) (1st 60 survived 7 female) (died 40 1st 8 male) (1st survived female 9 50) (died 1st 10 70 male) (1st died male 11 50) (1st 12 survived 20 female) (survived 20 1st female 13) (30 survived 1st 14 female) (male 80 1st 15 survived) (1st male died -1 16) (died male 20 1st 17) (female 1st survived 50 18) (30 survived 1st female 19) (40 20 male died 1st) (40 21 male 1st survived) (1st survived female 22 50) (30 survived male 1st 23) (female 40 1st 24 survived) (survived female 1st 30 25) (died 20 1st male 26) (1st male 27 20 survived) (20 survived 1st female 28) (29 40 survived 1st female) (male 1st 30 survived 30) (40 31 male 1st died) (32 40 1st male survived) (30 female survived 33 1st) (34 60 survived 1st female) (male 35 40 died 1st) (40 36 female 1st survived) (1st female 37 20 survived) (1st -1 survived male 38) (40 died male 39 1st) (died male 1st 50 40) (died male 41 -1 1st) (40 1st survived female 42) (female 43 1st survived 60) (60 1st 44 survived female) (1st 45 40 survived female) (male 46 40 died 1st) (male died -1 47 1st) (1st survived male 48 40) (survived 1st 50 49 female) (40 survived 50 male 1st) (51 1st female survived 60) (male 30 1st 52 died) (53 died 30 1st male) (1st male 20 died 54) (male 55 survived 10 1st) (56 survived 10 1st female) (40 1st survived male 57) (40 1st female 58 survived) (59 50 died male 1st) (-1 60 1st survived female) (male 61 1st 40 died) (female survived 80 1st 62) (1st male 63 died 50) (50 64 female survived 1st) (survived 30 male 1st 65) (female 1st survived 30 66) (female 67 survived 1st 40) (1st survived female 68 30) (69 male survived 40 1st) (female survived 70 1st -1) (died 1st male 71 -1) (died 30 72 male 1st) (73 survived female 1st 30) (74 1st female survived 20) (-1 male 75 1st died) (male 50 76 1st died) (40 survived 1st female 77) (78 male died 1st 40) (survived 60 female 79 1st) (80 survived female 60 1st) (1st died 81 male -1) (1st 70 died male 82) (83 40 female 1st survived) (survived 1st 60 84 female) (85 1st died male 40) (female survived 86 1st 40) (87 survived 50 male 1st) (male 88 1st survived 30) (30 female 1st 89 survived) (male died 30 90 1st) (1st female 91 30 survived) (30 92 1st survived male) (20 survived 1st 93 female) (male survived 1st 50 94) (0 male survived 95 1st) (survived 50 96 female 1st) (male 1st 50 97 died) (30 98 survived 1st female) (survived 99 female 1st 50) (100 survived 1st female 50) ...]
+# [(30 1 1st female survived) (male 1st 0 survived 2) (1st 0 died 3 female) (male 4 died 30 1st) (died 1st female 5 20) (1st male 6 50 survived) (7 female survived 60 1st) (1st died 8 male 40) (9 1st 50 female survived) (70 died male 1st 10) (50 died 11 1st male) (20 female survived 1st 12) (13 survived female 1st 20) (female 30 1st survived 14) (male 1st 80 15 survived) (16 male 1st -1 died) (17 male died 1st 20) (18 survived female 1st 50) (survived 1st female 19 30) (died 1st 40 20 male) (survived 1st 21 40 male) (1st survived female 50 22) (23 male survived 30 1st) (1st 24 40 survived female) (25 survived female 1st 30) (20 26 male died 1st) (survived 20 1st male 27) (28 1st female survived 20) (survived female 40 29 1st) (1st 30 survived 30 male) (1st 40 male died 31) (32 40 1st male survived) (1st 30 survived female 33) (1st 34 female survived 60) (died 1st 35 40 male) (1st 40 survived 36 female) (37 20 survived female 1st) (-1 1st male survived 38) (male 39 died 40 1st) (died 1st male 50 40) (41 male -1 1st died) (40 survived 42 1st female) (60 survived 43 1st female) (44 60 survived 1st female) (45 40 female survived 1st) (died 46 male 1st 40) (1st male died 47 -1) (48 1st 40 male survived) (1st 49 female survived 50) (50 1st male survived 40) (51 female survived 60 1st) (1st 52 died 30 male) (30 1st male died 53) (20 54 died 1st male) (10 1st survived male 55) (10 1st survived female 56) (57 1st survived 40 male) (female 1st 40 survived 58) (50 male died 59 1st) (survived 60 female -1 1st) (died male 40 1st 61) (female 1st survived 62 80) (died 63 50 male 1st) (survived 50 female 1st 64) (1st male 30 65 survived) (66 female 30 1st survived) (1st 40 survived female 67) (1st female 68 30 survived) (male 40 1st 69 survived) (female 70 1st survived -1) (1st -1 male 71 died) (30 72 male 1st died) (female 30 survived 73 1st) (female 20 survived 1st 74) (-1 male died 1st 75) (male 1st 50 died 76) (77 survived 1st female 40) (40 male 1st died 78) (79 female 60 1st survived) (60 survived 80 1st female) (1st 81 -1 died male) (70 1st died 82 male) (survived 1st 83 female 40) (84 1st female 60 survived) (40 male 85 1st died) (survived 86 40 female 1st) (survived male 87 1st 50) (survived male 30 88 1st) (30 1st survived 89 female) (male 30 90 died 1st) (survived 1st 91 female 30) (92 30 male survived 1st) (1st 93 survived 20 female) (survived 94 male 1st 50) (95 1st survived male 0) (96 50 1st female survived) (97 male 50 1st died) (30 98 survived 1st female) (1st 99 survived female 50) (100 female 50 1st survived) ...]
 ```
 
 **Remark:** `elcat`'s argument `min-support` can take both integers greater than 1 and frequencies between 0 and 1.
@@ -150,15 +161,15 @@ association-rules(@dsTitanic, min-support => 0.3, min-confidence => 0.7)
 ==> to-pretty-table
 ```
 ```
-# +----------+-------------------------------------------+------------+----------+----------+------------------------+------------+-------+
-# |   lift   |                antecendent                | conviction | support  | leverage |       consequent       | confidence | count |
-# +----------+-------------------------------------------+------------+----------+----------+------------------------+------------+-------+
-# | 1.309025 |             passengerSex:male             |  2.000009  | 0.521008 | 0.122996 | passengerSurvival:died |  0.809015  |  682  |
-# | 1.309025 |           passengerSurvival:died          |  2.267729  | 0.521008 | 0.122996 |   passengerSex:male    |  0.843016  |  682  |
-# | 1.371894 |    passengerClass:3rd passengerSex:male   |  2.510823  | 0.319328 | 0.086564 | passengerSurvival:died |  0.847870  |  418  |
-# | 1.229290 | passengerClass:3rd passengerSurvival:died |  1.708785  | 0.319328 | 0.059562 |   passengerSex:male    |  0.791667  |  418  |
-# | 1.204977 |             passengerClass:3rd            |  1.496229  | 0.403361 | 0.068615 | passengerSurvival:died |  0.744711  |  528  |
-# +----------+-------------------------------------------+------------+----------+----------+------------------------+------------+-------+
+# +------------+----------+-------+------------+----------+------------------------+----------+-------------------------------------------+
+# | confidence | support  | count | conviction | leverage |       consequent       |   lift   |                antecendent                |
+# +------------+----------+-------+------------+----------+------------------------+----------+-------------------------------------------+
+# |  0.809015  | 0.521008 |  682  |  2.000009  | 0.122996 | passengerSurvival:died | 1.309025 |             passengerSex:male             |
+# |  0.843016  | 0.521008 |  682  |  2.267729  | 0.122996 |   passengerSex:male    | 1.309025 |           passengerSurvival:died          |
+# |  0.847870  | 0.319328 |  418  |  2.510823  | 0.086564 | passengerSurvival:died | 1.371894 |    passengerClass:3rd passengerSex:male   |
+# |  0.791667  | 0.319328 |  418  |  1.708785  | 0.059562 |   passengerSex:male    | 1.229290 | passengerClass:3rd passengerSurvival:died |
+# |  0.744711  | 0.403361 |  528  |  1.496229  | 0.068615 | passengerSurvival:died | 1.204977 |             passengerClass:3rd            |
+# +------------+----------+-------+------------+----------+------------------------+----------+-------------------------------------------+
 ```
 
 ### Reusing found frequent sets
@@ -183,25 +194,25 @@ $eclatObj.find-rules(min-confidence=>0.7)
 ==> to-pretty-table 
 ```
 ```
-# +------------+-------+----------+-------------+----------+------------+----------+------------+
-# | conviction | count |   lift   | antecendent | support  | confidence | leverage | consequent |
-# +------------+-------+----------+-------------+----------+------------+----------+------------+
-# |  2.267729  |  339  | 1.904511 |    female   | 0.258976 |  0.727468  | 0.122996 |  survived  |
-# |  2.267729  |  682  | 1.309025 |     died    | 0.521008 |  0.843016  | 0.122996 |    male    |
-# |  2.000009  |  682  | 1.309025 |     male    | 0.521008 |  0.809015  | 0.122996 |    died    |
-# |  2.313980  |  176  | 1.313897 |   20 died   | 0.134454 |  0.846154  | 0.032122 |    male    |
-# |  2.482811  |  176  | 1.369117 |   20 male   | 0.134454 |  0.846154  | 0.036249 |    died    |
-# |  1.708785  |  418  | 1.229290 |   3rd died  | 0.319328 |  0.791667  | 0.059562 |    male    |
-# |  2.510823  |  418  | 1.371894 |   3rd male  | 0.319328 |  0.847870  | 0.086564 |    died    |
-# |  2.181917  |  159  | 1.299438 |   -1 died   | 0.121467 |  0.836842  | 0.027990 |    male    |
-# |  2.717870  |  159  | 1.390646 |   -1 male   | 0.121467 |  0.859459  | 0.034121 |    died    |
-# |  1.200349  |  185  | 1.092265 |      -1     | 0.141329 |  0.703422  | 0.011938 |    male    |
-# |  1.496229  |  528  | 1.204977 |     3rd     | 0.403361 |  0.744711  | 0.068615 |    died    |
-# |  1.588999  |  158  | 1.229093 |    -1 3rd   | 0.120703 |  0.759615  | 0.022498 |    died    |
-# |  2.721543  |  158  | 1.535313 |   -1 died   | 0.120703 |  0.831579  | 0.042085 |    3rd     |
-# |  1.376142  |  190  | 1.168931 |      -1     | 0.145149 |  0.722433  | 0.020977 |    died    |
-# |  2.191819  |  208  | 1.460162 |      -1     | 0.158900 |  0.790875  | 0.050076 |    3rd     |
-# +------------+-------+----------+-------------+----------+------------+----------+------------+
+# +-------------+-------+----------+------------+----------+------------+----------+------------+
+# | antecendent | count |   lift   | confidence | support  | consequent | leverage | conviction |
+# +-------------+-------+----------+------------+----------+------------+----------+------------+
+# |    female   |  339  | 1.904511 |  0.727468  | 0.258976 |  survived  | 0.122996 |  2.267729  |
+# |      -1     |  208  | 1.460162 |  0.790875  | 0.158900 |    3rd     | 0.050076 |  2.191819  |
+# |      -1     |  185  | 1.092265 |  0.703422  | 0.141329 |    male    | 0.011938 |  1.200349  |
+# |     died    |  682  | 1.309025 |  0.843016  | 0.521008 |    male    | 0.122996 |  2.267729  |
+# |     male    |  682  | 1.309025 |  0.809015  | 0.521008 |    died    | 0.122996 |  2.000009  |
+# |   -1 died   |  159  | 1.299438 |  0.836842  | 0.121467 |    male    | 0.027990 |  2.181917  |
+# |   -1 male   |  159  | 1.390646 |  0.859459  | 0.121467 |    died    | 0.034121 |  2.717870  |
+# |   3rd died  |  418  | 1.229290 |  0.791667  | 0.319328 |    male    | 0.059562 |  1.708785  |
+# |   3rd male  |  418  | 1.371894 |  0.847870  | 0.319328 |    died    | 0.086564 |  2.510823  |
+# |   20 died   |  176  | 1.313897 |  0.846154  | 0.134454 |    male    | 0.032122 |  2.313980  |
+# |   20 male   |  176  | 1.369117 |  0.846154  | 0.134454 |    died    | 0.036249 |  2.482811  |
+# |      -1     |  190  | 1.168931 |  0.722433  | 0.145149 |    died    | 0.020977 |  1.376142  |
+# |     3rd     |  528  | 1.204977 |  0.744711  | 0.403361 |    died    | 0.068615 |  1.496229  |
+# |    -1 3rd   |  158  | 1.229093 |  0.759615  | 0.120703 |    died    | 0.022498 |  1.588999  |
+# |   -1 died   |  158  | 1.535313 |  0.831579  | 0.120703 |    3rd     | 0.042085 |  2.721543  |
+# +-------------+-------+----------+------------+----------+------------+----------+------------+
 ```
 
 **Remark:** Note that because of the specified min confidence, the number of association rules is "contained" --
@@ -306,29 +317,38 @@ simply sends frequent sets found with Apriori to the Eclat based association rul
 (2014-2016),
 [MathematicaForPrediction at GitHub/antononcube](https://github.com/antononcube/MathematicaForPrediction/).
 
+[AAp1a] Anton Antonov
+[Implementation of the Apriori algorithm via Tries in Mathematica](https://github.com/antononcube/MathematicaForPrediction/blob/master/Misc/AprioriAlgorithmViaTries.m),
+(2022),
+[MathematicaForPrediction at GitHub/antononcube](https://github.com/antononcube/MathematicaForPrediction/).
+
 [AAp2] Anton Antonov,
 [Implementation of the Eclat algorithm in Mathematica](https://github.com/antononcube/MathematicaForPrediction/blob/master/EclatAlgorithm.m),
 (2022),
 [MathematicaForPrediction at GitHub/antononcube](https://github.com/antononcube/MathematicaForPrediction/).
 
 [AAp3] Anton Antonov,
-[Data::Generators Raku package](https://github.com/antononcube/Raku-Data-Generators),
+[Data::Generators Raku package](https://raku.land/cpan:ANTONOV/Data::Generators),
 (2021),
 [GitHub/antononcube](https://github.com/antononcube).
 
 [AAp4] Anton Antonov,
-[Data::Reshapers Raku package](https://github.com/antononcube/Raku-Data-Reshapers),
+[Data::Reshapers Raku package](https://raku.land/cpan:ANTONOV/Data::Reshapers),
 (2021),
 [GitHub/antononcube](https://github.com/antononcube).
 
 [AAp5] Anton Antonov,
-[Data::Summarizers Raku package](https://github.com/antononcube/Raku-Data-Summarizers),
+[Data::Summarizers Raku package](https://raku.land/cpan:ANTONOV/Data::Summarizers),
 (2021),
 [GitHub/antononcube](https://github.com/antononcube).
 
 [AAp6] Anton Antonov,
-[UML::Translators Raku package](https://github.com/antononcube/Raku-UML-Translators),
+[UML::Translators Raku package](https://raku.land/zef:antononcube/UML::Translators),
 (2022),
 [GitHub/antononcube](https://github.com/antononcube).
 
+[AAp7] Anton Antonov,
+[ML::TrieWithFrequencies Raku package](https://raku.land/cpan:ANTONOV/ML::TriesWithFrequencies),
+(2021),
+[GitHub/antononcube](https://github.com/antononcube).
 
