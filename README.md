@@ -56,57 +56,57 @@ my @dsTitanic = get-titanic-dataset();
 records-summary(@dsTitanic);
 ```
 ```
-# +-----------------+---------------+----------------+----------------+-------------------+
-# | id              | passengerSex  | passengerClass | passengerAge   | passengerSurvival |
-# +-----------------+---------------+----------------+----------------+-------------------+
-# | 904     => 1    | male   => 843 | 3rd => 709     | 20      => 334 | died     => 809   |
-# | 1253    => 1    | female => 466 | 1st => 323     | -1      => 263 | survived => 500   |
-# | 1187    => 1    |               | 2nd => 277     | 30      => 258 |                   |
-# | 66      => 1    |               |                | 40      => 190 |                   |
-# | 393     => 1    |               |                | 50      => 88  |                   |
-# | 371     => 1    |               |                | 60      => 57  |                   |
-# | 485     => 1    |               |                | 0       => 56  |                   |
-# | (Other) => 1302 |               |                | (Other) => 63  |                   |
-# +-----------------+---------------+----------------+----------------+-------------------+
+# +---------------+-------------------+----------------+----------------+-----------------+
+# | passengerSex  | passengerSurvival | passengerClass | passengerAge   | id              |
+# +---------------+-------------------+----------------+----------------+-----------------+
+# | male   => 843 | died     => 809   | 3rd => 709     | 20      => 334 | 607     => 1    |
+# | female => 466 | survived => 500   | 1st => 323     | -1      => 263 | 849     => 1    |
+# |               |                   | 2nd => 277     | 30      => 258 | 519     => 1    |
+# |               |                   |                | 40      => 190 | 724     => 1    |
+# |               |                   |                | 50      => 88  | 189     => 1    |
+# |               |                   |                | 60      => 57  | 948     => 1    |
+# |               |                   |                | 0       => 56  | 287     => 1    |
+# |               |                   |                | (Other) => 63  | (Other) => 1302 |
+# +---------------+-------------------+----------------+----------------+-----------------+
 ```
 
-**Problem:** Find all combinations values of the variables "passengerAge", "passengerClass", "passengerSex", and
+**Problem:** Find all combinations of values of the variables "passengerAge", "passengerClass", "passengerSex", and
 "passengerSurvival" that appear more than 200 times in the Titanic dataset.
 
-Here is how we use Eclat's implementation to give an answer:
+Here is how we use the function `frequent-sets` to give an answer:
 
 ```perl6
 use ML::AssociationRuleLearning;
-my @freqSets = eclat(@dsTitanic, min-support => 200, min-number-of-items => 2, max-number-of-items => Inf):counts;
+my @freqSets = frequent-sets(@dsTitanic, min-support => 200, min-number-of-items => 2, max-number-of-items => Inf):counts;
 @freqSets.elems
 ```
 ```
 # 11
 ```
 
-The function `eclat` returns the frequent sets together with their support.
+The function `frequent-sets` returns the frequent sets together with their support.
 
 Here we tabulate the result:
 
 ```perl6
-say to-pretty-table(@freqSets.map({ %( Frequent-set => $_.key.join(' '), Support => $_.value) }), align => 'l');
+say to-pretty-table(@freqSets.map({ %( Frequent-set => $_.key.join(' '), Count => $_.value) }), align => 'l');
 ```
 ```
-# +----------+-------------------------------------------------------------+
-# | Support  | Frequent-set                                                |
-# +----------+-------------------------------------------------------------+
-# | 0.158900 | passengerAge:-1 passengerClass:3rd                          |
-# | 0.157372 | passengerAge:20 passengerClass:3rd                          |
-# | 0.158136 | passengerAge:20 passengerSex:male                           |
-# | 0.158136 | passengerAge:20 passengerSurvival:died                      |
-# | 0.152788 | passengerClass:1st passengerSurvival:survived               |
-# | 0.165011 | passengerClass:3rd passengerSex:female                      |
-# | 0.376623 | passengerClass:3rd passengerSex:male                        |
-# | 0.319328 | passengerClass:3rd passengerSex:male passengerSurvival:died |
-# | 0.403361 | passengerClass:3rd passengerSurvival:died                   |
-# | 0.258976 | passengerSex:female passengerSurvival:survived              |
-# | 0.521008 | passengerSex:male passengerSurvival:died                    |
-# +----------+-------------------------------------------------------------+
+# +-------+-------------------------------------------------------------+
+# | Count | Frequent-set                                                |
+# +-------+-------------------------------------------------------------+
+# | 208   | passengerAge:-1 passengerClass:3rd                          |
+# | 206   | passengerAge:20 passengerClass:3rd                          |
+# | 207   | passengerAge:20 passengerSex:male                           |
+# | 207   | passengerAge:20 passengerSurvival:died                      |
+# | 200   | passengerClass:1st passengerSurvival:survived               |
+# | 216   | passengerClass:3rd passengerSex:female                      |
+# | 493   | passengerClass:3rd passengerSex:male                        |
+# | 418   | passengerClass:3rd passengerSex:male passengerSurvival:died |
+# | 528   | passengerClass:3rd passengerSurvival:died                   |
+# | 339   | passengerSex:female passengerSurvival:survived              |
+# | 682   | passengerSex:male passengerSurvival:died                    |
+# +-------+-------------------------------------------------------------+
 ```
 
 We can verify the result by looking into these group counts, [AA2]:
@@ -118,8 +118,8 @@ $obj = group-by( @dsTitanic, <passengerClass passengerSurvival passengerSex>);
 .say for $obj>>.elems.grep({ $_.value >= 200 });
 ```
 ```
-# 3rd.male => 493
 # 3rd.female => 216
+# 3rd.male => 493
 # 3rd.died.male => 418
 ```
 
@@ -131,24 +131,24 @@ $obj = $obj.map({ $_.key => cross-tabulate( $_.value, "passengerSex", "passenger
 .say for $obj.Array;
 ```
 ```
-# 1st => {female => {died => 5, survived => 139}, male => {died => 118, survived => 61}}
 # 2nd => {female => {died => 12, survived => 94}, male => {died => 146, survived => 25}}
+# 1st => {female => {died => 5, survived => 139}, male => {died => 118, survived => 61}}
 # 3rd => {female => {died => 110, survived => 106}, male => {died => 418, survived => 75}}
 ```
 
-**Remark:** For datasets -- i.e. arrays of hashes -- `eclat` preprocess the data by concatenating
-column names with corresponding column values. This done in order to prevent "collisions" from of same values from
-different columns. If that concatenation is not desired manual preprocessing like this can be used:
+**Remark:** For datasets -- i.e. arrays of hashes -- `frequent-sets` preprocesses the data by concatenating
+column names with corresponding column values. This is done in order to prevent "collisions" of same values 
+coming from different columns. If that concatenation is not desired then manual preprocessing like this can be used:
 
-```perl6
+```{perl6, eval=FALSE}
 @dsTitanic.map({ $_.values.List }).Array
 ```
-```
-# [(30 1 1st female survived) (male 1st 0 survived 2) (1st 0 died 3 female) (male 4 died 30 1st) (died 1st female 5 20) (1st male 6 50 survived) (7 female survived 60 1st) (1st died 8 male 40) (9 1st 50 female survived) (70 died male 1st 10) (50 died 11 1st male) (20 female survived 1st 12) (13 survived female 1st 20) (female 30 1st survived 14) (male 1st 80 15 survived) (16 male 1st -1 died) (17 male died 1st 20) (18 survived female 1st 50) (survived 1st female 19 30) (died 1st 40 20 male) (survived 1st 21 40 male) (1st survived female 50 22) (23 male survived 30 1st) (1st 24 40 survived female) (25 survived female 1st 30) (20 26 male died 1st) (survived 20 1st male 27) (28 1st female survived 20) (survived female 40 29 1st) (1st 30 survived 30 male) (1st 40 male died 31) (32 40 1st male survived) (1st 30 survived female 33) (1st 34 female survived 60) (died 1st 35 40 male) (1st 40 survived 36 female) (37 20 survived female 1st) (-1 1st male survived 38) (male 39 died 40 1st) (died 1st male 50 40) (41 male -1 1st died) (40 survived 42 1st female) (60 survived 43 1st female) (44 60 survived 1st female) (45 40 female survived 1st) (died 46 male 1st 40) (1st male died 47 -1) (48 1st 40 male survived) (1st 49 female survived 50) (50 1st male survived 40) (51 female survived 60 1st) (1st 52 died 30 male) (30 1st male died 53) (20 54 died 1st male) (10 1st survived male 55) (10 1st survived female 56) (57 1st survived 40 male) (female 1st 40 survived 58) (50 male died 59 1st) (survived 60 female -1 1st) (died male 40 1st 61) (female 1st survived 62 80) (died 63 50 male 1st) (survived 50 female 1st 64) (1st male 30 65 survived) (66 female 30 1st survived) (1st 40 survived female 67) (1st female 68 30 survived) (male 40 1st 69 survived) (female 70 1st survived -1) (1st -1 male 71 died) (30 72 male 1st died) (female 30 survived 73 1st) (female 20 survived 1st 74) (-1 male died 1st 75) (male 1st 50 died 76) (77 survived 1st female 40) (40 male 1st died 78) (79 female 60 1st survived) (60 survived 80 1st female) (1st 81 -1 died male) (70 1st died 82 male) (survived 1st 83 female 40) (84 1st female 60 survived) (40 male 85 1st died) (survived 86 40 female 1st) (survived male 87 1st 50) (survived male 30 88 1st) (30 1st survived 89 female) (male 30 90 died 1st) (survived 1st 91 female 30) (92 30 male survived 1st) (1st 93 survived 20 female) (survived 94 male 1st 50) (95 1st survived male 0) (96 50 1st female survived) (97 male 50 1st died) (30 98 survived 1st female) (1st 99 survived female 50) (100 female 50 1st survived) ...]
-```
 
-**Remark:** `elcat`'s argument `min-support` can take both integers greater than 1 and frequencies between 0 and 1.
+**Remark:** `frequent-sets`'s argument `min-support` can take both integers greater than 1 and frequencies between 0 and 1.
 (If an integer greater than one is given, then the corresponding frequency is derived.)
+
+**Remark:** By default `frequent-sets` uses the Eclat algorithm. The functions `apriori` and `eclat`
+call `frequent-sets` with the option settings `method=>'Apriori'` and `method=>'Eclat'` respectively.
 
 -------
 
@@ -161,26 +161,27 @@ association-rules(@dsTitanic, min-support => 0.3, min-confidence => 0.7)
 ==> to-pretty-table
 ```
 ```
-# +------------+----------+-------+------------+----------+------------------------+----------+-------------------------------------------+
-# | confidence | support  | count | conviction | leverage |       consequent       |   lift   |                antecendent                |
-# +------------+----------+-------+------------+----------+------------------------+----------+-------------------------------------------+
-# |  0.809015  | 0.521008 |  682  |  2.000009  | 0.122996 | passengerSurvival:died | 1.309025 |             passengerSex:male             |
-# |  0.843016  | 0.521008 |  682  |  2.267729  | 0.122996 |   passengerSex:male    | 1.309025 |           passengerSurvival:died          |
-# |  0.847870  | 0.319328 |  418  |  2.510823  | 0.086564 | passengerSurvival:died | 1.371894 |    passengerClass:3rd passengerSex:male   |
-# |  0.791667  | 0.319328 |  418  |  1.708785  | 0.059562 |   passengerSex:male    | 1.229290 | passengerClass:3rd passengerSurvival:died |
-# |  0.744711  | 0.403361 |  528  |  1.496229  | 0.068615 | passengerSurvival:died | 1.204977 |             passengerClass:3rd            |
-# +------------+----------+-------+------------+----------+------------------------+----------+-------------------------------------------+
+# +----------+------------+-------------------------------------------+----------+------------+------------------------+----------+-------+
+# | support  | conviction |                antecendent                | leverage | confidence |       consequent       |   lift   | count |
+# +----------+------------+-------------------------------------------+----------+------------+------------------------+----------+-------+
+# | 0.403361 |  1.496229  |             passengerClass:3rd            | 0.068615 |  0.744711  | passengerSurvival:died | 1.204977 |  528  |
+# | 0.521008 |  2.000009  |             passengerSex:male             | 0.122996 |  0.809015  | passengerSurvival:died | 1.309025 |  682  |
+# | 0.521008 |  2.267729  |           passengerSurvival:died          | 0.122996 |  0.843016  |   passengerSex:male    | 1.309025 |  682  |
+# | 0.319328 |  2.510823  |    passengerClass:3rd passengerSex:male   | 0.086564 |  0.847870  | passengerSurvival:died | 1.371894 |  418  |
+# | 0.319328 |  1.708785  | passengerClass:3rd passengerSurvival:died | 0.059562 |  0.791667  |   passengerSex:male    | 1.229290 |  418  |
+# +----------+------------+-------------------------------------------+----------+------------+------------------------+----------+-------+
 ```
 
 ### Reusing found frequent sets
 
-The function `eclat` takes the adverb ":object" that makes `eclat` return an object of type
-`ML::AssociationRuleLearning::Eclat`, which can be "pipelined" to find association rules.
+The function `frequent-sets` takes the adverb ":object" that makes `frequent-sets` return an object of type
+`ML::AssociationRuleLearning::Apriori` or `ML::AssociationRuleLearning::Eclat`, 
+which can be "pipelined" to find association rules.
 
 Here we find frequent sets, return the corresponding object, and retrieve the result:
 
 ```perl6
-my $eclatObj = eclat(@dsTitanic.map({ $_.values.List }).Array, min-support => 0.12, min-number-of-items => 2, max-number-of-items => 6):object;
+my $eclatObj = frequent-sets(@dsTitanic.map({ $_.values.List }).Array, min-support => 0.12, min-number-of-items => 2, max-number-of-items => 6):object;
 $eclatObj.result.elems
 ```
 ```
@@ -194,25 +195,25 @@ $eclatObj.find-rules(min-confidence=>0.7)
 ==> to-pretty-table 
 ```
 ```
-# +-------------+-------+----------+------------+----------+------------+----------+------------+
-# | antecendent | count |   lift   | confidence | support  | consequent | leverage | conviction |
-# +-------------+-------+----------+------------+----------+------------+----------+------------+
-# |    female   |  339  | 1.904511 |  0.727468  | 0.258976 |  survived  | 0.122996 |  2.267729  |
-# |      -1     |  208  | 1.460162 |  0.790875  | 0.158900 |    3rd     | 0.050076 |  2.191819  |
-# |      -1     |  185  | 1.092265 |  0.703422  | 0.141329 |    male    | 0.011938 |  1.200349  |
-# |     died    |  682  | 1.309025 |  0.843016  | 0.521008 |    male    | 0.122996 |  2.267729  |
-# |     male    |  682  | 1.309025 |  0.809015  | 0.521008 |    died    | 0.122996 |  2.000009  |
-# |   -1 died   |  159  | 1.299438 |  0.836842  | 0.121467 |    male    | 0.027990 |  2.181917  |
-# |   -1 male   |  159  | 1.390646 |  0.859459  | 0.121467 |    died    | 0.034121 |  2.717870  |
-# |   3rd died  |  418  | 1.229290 |  0.791667  | 0.319328 |    male    | 0.059562 |  1.708785  |
-# |   3rd male  |  418  | 1.371894 |  0.847870  | 0.319328 |    died    | 0.086564 |  2.510823  |
-# |   20 died   |  176  | 1.313897 |  0.846154  | 0.134454 |    male    | 0.032122 |  2.313980  |
-# |   20 male   |  176  | 1.369117 |  0.846154  | 0.134454 |    died    | 0.036249 |  2.482811  |
-# |      -1     |  190  | 1.168931 |  0.722433  | 0.145149 |    died    | 0.020977 |  1.376142  |
-# |     3rd     |  528  | 1.204977 |  0.744711  | 0.403361 |    died    | 0.068615 |  1.496229  |
-# |    -1 3rd   |  158  | 1.229093 |  0.759615  | 0.120703 |    died    | 0.022498 |  1.588999  |
-# |   -1 died   |  158  | 1.535313 |  0.831579  | 0.120703 |    3rd     | 0.042085 |  2.721543  |
-# +-------------+-------+----------+------------+----------+------------+----------+------------+
+# +------------+-------+------------+----------+----------+------------+-------------+----------+
+# | consequent | count | confidence |   lift   | support  | conviction | antecendent | leverage |
+# +------------+-------+------------+----------+----------+------------+-------------+----------+
+# |    3rd     |  208  |  0.790875  | 1.460162 | 0.158900 |  2.191819  |      -1     | 0.050076 |
+# |    died    |  190  |  0.722433  | 1.168931 | 0.145149 |  1.376142  |      -1     | 0.020977 |
+# |    died    |  528  |  0.744711  | 1.204977 | 0.403361 |  1.496229  |     3rd     | 0.068615 |
+# |    died    |  158  |  0.759615  | 1.229093 | 0.120703 |  1.588999  |    -1 3rd   | 0.022498 |
+# |    3rd     |  158  |  0.831579  | 1.535313 | 0.120703 |  2.721543  |   -1 died   | 0.042085 |
+# |    male    |  185  |  0.703422  | 1.092265 | 0.141329 |  1.200349  |      -1     | 0.011938 |
+# |    male    |  682  |  0.843016  | 1.309025 | 0.521008 |  2.267729  |     died    | 0.122996 |
+# |    died    |  682  |  0.809015  | 1.309025 | 0.521008 |  2.000009  |     male    | 0.122996 |
+# |    male    |  159  |  0.836842  | 1.299438 | 0.121467 |  2.181917  |   -1 died   | 0.027990 |
+# |    died    |  159  |  0.859459  | 1.390646 | 0.121467 |  2.717870  |   -1 male   | 0.034121 |
+# |    male    |  176  |  0.846154  | 1.313897 | 0.134454 |  2.313980  |   20 died   | 0.032122 |
+# |    died    |  176  |  0.846154  | 1.369117 | 0.134454 |  2.482811  |   20 male   | 0.036249 |
+# |    male    |  418  |  0.791667  | 1.229290 | 0.319328 |  1.708785  |   3rd died  | 0.059562 |
+# |    died    |  418  |  0.847870  | 1.371894 | 0.319328 |  2.510823  |   3rd male  | 0.086564 |
+# |  survived  |  339  |  0.727468  | 1.904511 | 0.258976 |  2.267729  |    female   | 0.122996 |
+# +------------+-------+------------+----------+----------+------------+-------------+----------+
 ```
 
 **Remark:** Note that because of the specified min confidence, the number of association rules is "contained" --
@@ -247,6 +248,11 @@ Here get the [diagram](./resources/class-diagram.png):
 ```shell
 to-uml-spec ML::AssociationRuleLearning | java -jar ~/PlantUML/plantuml-1.2022.5.jar -pipe > ./resources/class-diagram.png
 ```
+
+**Remark:** Maybe it is a good idea to have an abstract class named, say,
+`ML::AssociationRuleLearning::AbstractFinder` that is a parent of both
+`ML::AssociationRuleLearning::Apriori` and `ML::AssociationRuleLearning::Eclat`,
+but I have not found to be necessary. (At this point of development.)
 
 ### Eclat
 

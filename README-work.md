@@ -56,23 +56,23 @@ my @dsTitanic = get-titanic-dataset();
 records-summary(@dsTitanic);
 ```
 
-**Problem:** Find all combinations values of the variables "passengerAge", "passengerClass", "passengerSex", and
+**Problem:** Find all combinations of values of the variables "passengerAge", "passengerClass", "passengerSex", and
 "passengerSurvival" that appear more than 200 times in the Titanic dataset.
 
-Here is how we use Eclat's implementation to give an answer:
+Here is how we use the function `frequent-sets` to give an answer:
 
 ```perl6
 use ML::AssociationRuleLearning;
-my @freqSets = eclat(@dsTitanic, min-support => 200, min-number-of-items => 2, max-number-of-items => Inf):counts;
+my @freqSets = frequent-sets(@dsTitanic, min-support => 200, min-number-of-items => 2, max-number-of-items => Inf):counts;
 @freqSets.elems
 ```
 
-The function `eclat` returns the frequent sets together with their support.
+The function `frequent-sets` returns the frequent sets together with their support.
 
 Here we tabulate the result:
 
 ```perl6
-say to-pretty-table(@freqSets.map({ %( Frequent-set => $_.key.join(' '), Support => $_.value) }), align => 'l');
+say to-pretty-table(@freqSets.map({ %( Frequent-set => $_.key.join(' '), Count => $_.value) }), align => 'l');
 ```
 
 We can verify the result by looking into these group counts, [AA2]:
@@ -92,16 +92,19 @@ $obj = $obj.map({ $_.key => cross-tabulate( $_.value, "passengerSex", "passenger
 .say for $obj.Array;
 ```
 
-**Remark:** For datasets -- i.e. arrays of hashes -- `eclat` preprocess the data by concatenating
-column names with corresponding column values. This done in order to prevent "collisions" from of same values from
-different columns. If that concatenation is not desired manual preprocessing like this can be used:
+**Remark:** For datasets -- i.e. arrays of hashes -- `frequent-sets` preprocesses the data by concatenating
+column names with corresponding column values. This is done in order to prevent "collisions" of same values 
+coming from different columns. If that concatenation is not desired then manual preprocessing like this can be used:
 
-```perl6
+```{perl6, eval=FALSE}
 @dsTitanic.map({ $_.values.List }).Array
 ```
 
-**Remark:** `elcat`'s argument `min-support` can take both integers greater than 1 and frequencies between 0 and 1.
+**Remark:** `frequent-sets`'s argument `min-support` can take both integers greater than 1 and frequencies between 0 and 1.
 (If an integer greater than one is given, then the corresponding frequency is derived.)
+
+**Remark:** By default `frequent-sets` uses the Eclat algorithm. The functions `apriori` and `eclat`
+call `frequent-sets` with the option settings `method=>'Apriori'` and `method=>'Eclat'` respectively.
 
 -------
 
@@ -116,13 +119,14 @@ association-rules(@dsTitanic, min-support => 0.3, min-confidence => 0.7)
 
 ### Reusing found frequent sets
 
-The function `eclat` takes the adverb ":object" that makes `eclat` return an object of type
-`ML::AssociationRuleLearning::Eclat`, which can be "pipelined" to find association rules.
+The function `frequent-sets` takes the adverb ":object" that makes `frequent-sets` return an object of type
+`ML::AssociationRuleLearning::Apriori` or `ML::AssociationRuleLearning::Eclat`, 
+which can be "pipelined" to find association rules.
 
 Here we find frequent sets, return the corresponding object, and retrieve the result:
 
 ```perl6
-my $eclatObj = eclat(@dsTitanic.map({ $_.values.List }).Array, min-support => 0.12, min-number-of-items => 2, max-number-of-items => 6):object;
+my $eclatObj = frequent-sets(@dsTitanic.map({ $_.values.List }).Array, min-support => 0.12, min-number-of-items => 2, max-number-of-items => 6):object;
 $eclatObj.result.elems
 ```
 
@@ -165,6 +169,11 @@ Here get the [diagram](./resources/class-diagram.png):
 ```shell
 to-uml-spec ML::AssociationRuleLearning | java -jar ~/PlantUML/plantuml-1.2022.5.jar -pipe > ./resources/class-diagram.png
 ```
+
+**Remark:** Maybe it is a good idea to have an abstract class named, say,
+`ML::AssociationRuleLearning::AbstractFinder` that is a parent of both
+`ML::AssociationRuleLearning::Apriori` and `ML::AssociationRuleLearning::Eclat`,
+but I have not found to be necessary. (At this point of development.)
 
 ### Eclat
 
