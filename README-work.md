@@ -7,14 +7,15 @@ This repository has the code of a Raku package for
 [Association Rule Learning (ARL)](https://en.wikipedia.org/wiki/Association_rule_learning)
 functions, [Wk1].
 
-ARL framework includes the algorithms 
+The ARL framework includes the algorithms 
 [Apriori](https://en.wikipedia.org/wiki/Apriori_algorithm) 
 and 
 [Eclat](https://en.wikipedia.org/wiki/Association_rule_learning#Eclat_algorithm), 
 and the measures 
 [confidence](https://en.wikipedia.org/wiki/Association_rule_learning#Confidence),
 [lift](https://en.wikipedia.org/wiki/Association_rule_learning#Lift), and 
-[conviction](https://en.wikipedia.org/wiki/Association_rule_learning#Conviction).
+[conviction](https://en.wikipedia.org/wiki/Association_rule_learning#Conviction), 
+(and others.)
 
 For computational introduction to ARL utilization (in Mathematica) see the article
 ["Movie genre associations"](https://mathematicaforprediction.wordpress.com/2013/10/06/movie-genre-associations/),
