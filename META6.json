@@ -8,7 +8,7 @@
   ],
   "auth": "zef:antononcube",
   "depends": [
-    "Data::Reshapers:ver<0.1.9>",
+    "Data::Reshapers:ver<0.1.9+>",
     "ML::TriesWithFrequencies:api:<2>"
   ],
   "build-depends": [],
