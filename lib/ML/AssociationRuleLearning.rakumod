@@ -107,6 +107,15 @@ multi sub frequent-sets($transactions is copy,
 
 #------------------------------------------------------------
 #| Find association rules
+#| C<$transactions> -- transactions data.
+#| C<:$min-support> -- minimum support for association rules found; can be an integer or a frequency.
+#| C<:$min-confidence> -- minimum confidence for association rules found; can be an integer or a frequency.
+#| C<:$max-number-of-items> -- maximum length of frequent sets found.
+#| C<:$min-number-of-items> -- minimum length of frequent sets found.
+#| C<:$method> -- method to use, one of Whatever, 'Apriori', or 'Eclat'.
+#| C<:$sep> -- separator to use in data preprocessing.
+#| C<:$set-set> -- separator to use in transactional database building.
+#| C<:$object> -- should an object be returned or not?
 our proto association-rules($transactions, |) is export {*}
 
 multi sub association-rules($transactions, Numeric $min-support, Numeric $min-confidence, *%args) {
@@ -120,7 +129,8 @@ multi sub association-rules($transactions is copy,
                             Numeric :$max-number-of-items = Inf,
                             :$method is copy = Whatever,
                             Str :$sep = ':',
-                            Str :$set-sep = '∩') {
+                            Str :$set-sep = '∩',
+                            Bool :$object = False) {
 
     if $method.isa(Whatever) { $method = 'Eclat' };
 
@@ -134,15 +144,15 @@ multi sub association-rules($transactions is copy,
         my ML::AssociationRuleLearning::Apriori $aprioriObj =
                 apriori($transactions, :$min-support, :$min-number-of-items, :$max-number-of-items, :$sep, :$set-sep):object:!counts;
 
+        # Using Eclat-based measures is faster than using Apriori.
         $eclatObj.preprocess($transactions);
         $eclatObj.freqSets = $aprioriObj.freqSets;
 
     } else {
-        $eclatObj = eclat($transactions, :$min-support, :$min-number-of-items, :$max-number-of-items, :$sep,
-                :$set-sep):object:!counts;
+        $eclatObj = eclat($transactions, :$min-support, :$min-number-of-items, :$max-number-of-items, :$sep, :$set-sep):object:!counts;
     }
 
     my @arules = $eclatObj.find-rules($min-confidence);
 
-    return @arules;
+    return $object ?? $eclatObj !! @arules;
 }
