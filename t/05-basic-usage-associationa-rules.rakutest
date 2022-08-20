@@ -10,13 +10,17 @@ use Data::Reshapers;
 
 my @dsTitanic = get-titanic-dataset();
 
-plan 2;
+plan 3;
 
 ## 1
 ok association-rules(@dsTitanic.map({ $_.values.List }).Array, method => 'eclat', min-support => 0.1, min-confidence => 0.7, min-number-of-items => 2, max-number-of-items => 3);
 
 ## 2
 ok association-rules(@dsTitanic.map({ $_.values.List }).Array, method => 'apriori', min-support => 0.3, min-confidence => 0.7, min-number-of-items => 2, max-number-of-items => 2);
+
+## 3
+is association-rules(@dsTitanic.map({ $_.values.List }).Array, min-support => 0.1, min-confidence => 0.7, min-number-of-items => 2, max-number-of-items => 3, :!object)[0].keys.sort,
+        <antecedent consequent count support confidence lift leverage conviction>.sort;
 
 
 done-testing;
