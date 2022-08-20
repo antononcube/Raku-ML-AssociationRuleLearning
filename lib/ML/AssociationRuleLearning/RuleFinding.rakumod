@@ -27,7 +27,7 @@ role ML::AssociationRuleLearning::RuleFinding {
 
         my @res = do
         for @candidates -> $c {
-            %( antecendent => $c.key,
+            %( antecedent => $c.key,
                consequent => $c.value,
                support => self.support(%itemTrans, $c.key, $c.value),
                count => self.support(%itemTrans, $c.key, $c.value):count,
