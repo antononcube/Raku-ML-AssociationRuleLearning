@@ -33,7 +33,7 @@ role ML::AssociationRuleLearning::Measures {
     ## Conviction
     ##-------------------------------------------------------
 
-    method convication(%itemTrans, $items1, $items2) {
+    method conviction(%itemTrans, $items1, $items2) {
         return (1 - self.support(%itemTrans, $items2)) / (1 - self.confidence(%itemTrans, $items1, $items2));
     }
 

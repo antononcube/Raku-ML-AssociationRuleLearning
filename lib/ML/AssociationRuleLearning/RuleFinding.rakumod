@@ -34,7 +34,7 @@ role ML::AssociationRuleLearning::RuleFinding {
                confidence => self.confidence(%itemTrans, $c.key, $c.value),
                lift => self.lift(%itemTrans, $c.key, $c.value),
                leverage => self.leverage(%itemTrans, $c.key, $c.value),
-               conviction => self.convication(%itemTrans, $c.key, $c.value))
+               conviction => self.conviction(%itemTrans, $c.key, $c.value))
         }
 
         @res = @res.grep({ $_<confidence> ≥ $min-confidence }).List;
