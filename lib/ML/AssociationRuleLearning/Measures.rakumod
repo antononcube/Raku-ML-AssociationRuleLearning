@@ -34,7 +34,13 @@ role ML::AssociationRuleLearning::Measures {
     ##-------------------------------------------------------
 
     method conviction(%itemTrans, $items1, $items2) {
-        return (1 - self.support(%itemTrans, $items2)) / (1 - self.confidence(%itemTrans, $items1, $items2));
+        my $conf = self.confidence(%itemTrans, $items1, $items2);
+        # I am not sure should we make ULP testing or not.
+        # Here I am relying on Raku's rational arithmetic.
+        if $conf == 1 {
+            return Inf
+        }
+        return (1 - self.support(%itemTrans, $items2)) / (1 - $conf);
     }
 
 }
