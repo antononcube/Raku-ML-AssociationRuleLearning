@@ -1,7 +1,7 @@
 {
   "name": "ML::AssociationRuleLearning",
   "description": "Package for association rule learning. (Apriori, Eclat, support, confidence, lift, leverage, conviction.)",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "perl": "6.d",
   "authors": [
     "Anton Antonov"
