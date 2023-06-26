@@ -3,7 +3,7 @@ use v6.d;
 use ML::AssociationRuleLearning::Apriori;
 use ML::AssociationRuleLearning::Eclat;
 use Data::Reshapers;
-use Data::Reshapers::Predicates;
+use Data::TypeSystem::Predicates;
 use Hash::Merge;
 
 unit module ML::AssociationRuleLearning;
