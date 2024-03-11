@@ -1,7 +1,7 @@
 {
   "name": "ML::AssociationRuleLearning",
   "description": "Package for association rule learning. (Apriori, Eclat, support, confidence, lift, leverage, conviction.)",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "perl": "6.d",
   "authors": [
     "Anton Antonov"
@@ -9,7 +9,7 @@
   "auth": "zef:antononcube",
   "depends": [
     "Data::Reshapers:ver<0.1.9+>",
-    "ML::TriesWithFrequencies:api:<2>"
+    "ML::TriesWithFrequencies:ver<0.6.6+>:api<2>"
   ],
   "build-depends": [],
   "test-depends": [],
