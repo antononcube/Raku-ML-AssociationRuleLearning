@@ -34,13 +34,13 @@ The examples below use the packages
 
 Via zef-ecosystem:
 
-```shell
+```
 zef install ML::AssociationRuleLearning
 ```
 
 From GitHub:
 
-```shell
+```
 zef install https://github.com/antononcube/Raku-ML-AssociationRuleLearning
 ```
 
