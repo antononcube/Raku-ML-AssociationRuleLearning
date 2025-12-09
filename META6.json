@@ -8,12 +8,10 @@
     "auth": "zef:antononcube",
     "depends": [
         "Data::Reshapers:ver<0.1.9+>",
-        "ML::TriesWithFrequencies:ver<0.6.6+>:api<2>"
-    ],
-    "build-depends": [],
-    "test-depends": [
+        "ML::TriesWithFrequencies:ver<0.6.6+>:api<2>",
         "Data::ExampleDatasets:ver<0.2.4+>"
     ],
+    "build-depends": [],
     "provides": {
         "ML::AssociationRuleLearning": "lib/ML/AssociationRuleLearning.rakumod",
         "ML::AssociationRuleLearning::Apriori": "lib/ML/AssociationRuleLearning/Apriori.rakumod",
