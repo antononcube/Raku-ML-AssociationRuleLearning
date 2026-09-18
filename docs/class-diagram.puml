@@ -1,4 +1,46 @@
 @startuml
+class ML::AssociationRuleLearning::Measures <<role>> {
+  {method} confidence
+  {method} conviction
+  {method} leverage
+  {method} lift
+}
+
+
+class ML::AssociationRuleLearning::Eclat  {
+  {field} $!nTransactions
+  {field} %!itemTransactions
+  {field} @!freqSets
+  {field} @!result
+  {method} POPULATE
+  {method} confidence
+  {method} conviction
+  {method} extend
+  {method} find-freq-sets-rec
+  {method} find-rules
+  {method} freqSets
+  {method} frequent-sets
+  {method} intersect
+  {method} is-list-of-lists
+  {method} is-map-of-sets
+  {method} is-positional-of-maps
+  {method} item-to-transactions-indexes
+  {method} itemTransactions
+  {method} leverage
+  {method} lift
+  {method} nTransactions
+  {method} preprocess
+  {method} really-flat
+  {method} result
+  {method} support
+  {method} tally
+  {method} transpose-transaction-sets
+}
+ML::AssociationRuleLearning::Eclat --|> ML::AssociationRuleLearning::Measures
+ML::AssociationRuleLearning::Eclat --|> ML::AssociationRuleLearning::Preprocessing
+ML::AssociationRuleLearning::Eclat --|> ML::AssociationRuleLearning::RuleFinding
+
+
 class ML::AssociationRuleLearning::Apriori  {
   {field} $!freqEnough
   {field} $!nTransactions
@@ -6,7 +48,7 @@ class ML::AssociationRuleLearning::Apriori  {
   {field} @!freqSets
   {field} @!result
   {field} @!transactions
-  {method} BUILDALL
+  {method} POPULATE
   {method} freqSets
   {method} frequent-sets
   {method} is-list-of-lists
@@ -25,11 +67,7 @@ class ML::AssociationRuleLearning::Apriori  {
 ML::AssociationRuleLearning::Apriori --|> ML::AssociationRuleLearning::Preprocessing
 
 
-class ML::AssociationRuleLearning::Measures <<role>> {
-  {method} confidence
-  {method} convication
-  {method} leverage
-  {method} lift
+class ML::AssociationRuleLearning::RuleFinding <<role>> {
 }
 
 
@@ -74,44 +112,6 @@ class "eclat" <<routine>> {
 "eclat" --|> Block
 "eclat" --|> Code
 "eclat" --|> Callable
-
-
-class ML::AssociationRuleLearning::RuleFinding <<role>> {
-}
-
-
-class ML::AssociationRuleLearning::Eclat  {
-  {field} $!nTransactions
-  {field} %!itemTransactions
-  {field} @!freqSets
-  {field} @!result
-  {method} BUILDALL
-  {method} confidence
-  {method} convication
-  {method} extend
-  {method} find-freq-sets-rec
-  {method} find-rules
-  {method} freqSets
-  {method} frequent-sets
-  {method} intersect
-  {method} is-list-of-lists
-  {method} is-map-of-sets
-  {method} is-positional-of-maps
-  {method} item-to-transactions-indexes
-  {method} itemTransactions
-  {method} leverage
-  {method} lift
-  {method} nTransactions
-  {method} preprocess
-  {method} really-flat
-  {method} result
-  {method} support
-  {method} tally
-  {method} transpose-transaction-sets
-}
-ML::AssociationRuleLearning::Eclat --|> ML::AssociationRuleLearning::Measures
-ML::AssociationRuleLearning::Eclat --|> ML::AssociationRuleLearning::Preprocessing
-ML::AssociationRuleLearning::Eclat --|> ML::AssociationRuleLearning::RuleFinding
 
 
 @enduml

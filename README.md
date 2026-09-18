@@ -234,16 +234,16 @@ a (much) larger number of rules would be produced with, say, `min-confidence=>0.
 
 Here is a UML diagram that shows package's structure:
 
-![](./resources/class-diagram.png)
+![](docs/class-diagram.png)
 
 
 The
-[PlantUML spec](./resources/class-diagram.puml)
+[PlantUML spec](docs/class-diagram.puml)
 and
-[diagram](./resources/class-diagram.png)
+[diagram](docs/class-diagram.png)
 were obtained with the CLI script `to-uml-spec` of the package "UML::Translators", [AAp6].
 
-Here we get the [PlantUML spec](./resources/class-diagram.puml):
+Here we get the [PlantUML spec](docs/class-diagram.puml):
 
 ```shell
 to-uml-spec ML::AssociationRuleLearning > ./resources/class-diagram.puml
@@ -252,7 +252,7 @@ to-uml-spec ML::AssociationRuleLearning > ./resources/class-diagram.puml
 # 
 ```
 
-Here get the [diagram](./resources/class-diagram.png):
+Here get the [diagram](docs/class-diagram.png):
 
 ```shell
 to-uml-spec ML::AssociationRuleLearning | java -jar ~/PlantUML/plantuml-1.2022.5.jar -pipe > ./resources/class-diagram.png
